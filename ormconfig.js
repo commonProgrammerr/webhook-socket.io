@@ -1,11 +1,12 @@
 const path = require('path')
-const basePath = process.env.NODE_ENV === 'dev' ? './src' : './build/src' 
+const isDev = process.env.NODE_ENV === 'dev'
+const basePath = isDev ? './src' : './build/src' 
 
 module.exports = {
   type: "sqlite",
   database:  path.resolve(basePath,"database/database.sqlite"),
-  migrations: [path.resolve(basePath,"database/migrations/*ts")],
-  entities: [path.resolve(basePath,"models/*.ts")],
+  migrations: [path.resolve(basePath,"database/migrations", isDev ?  "*.ts" : "*.js")],
+  entities: [path.resolve(basePath,"models", isDev ?  "*.ts" : "*.js")],
   cli: {
     migrationsDir: path.resolve(basePath, "./src/database/migrations")
   }
