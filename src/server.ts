@@ -11,26 +11,25 @@ const io = new Server(httpServer);
 
 const port = process.env.PORT || 3030;
 
-const conn = io.on('connection', async (socket) => {
-  console.log('connected')
-  app.post('/', async (req, res) => {
-    const {
-      mac,
-      status
-    } = req.query
-  
-    const alert = await controler.save({
-      alert_status: Number(status),
-      device_mac: String(mac)
-    })
-  
-    if (Number(status) !== 0) {
-      socket.emit('alert', mac, status, alert.created_at)
-    }
-  
-    res.json(AlertView.render(alert))
-  });
-})
+const conn = io.on('connection', async (socket) => console.log('connected:', socket.id))
+app.post('/', async (req, res) => {
+  const {
+    mac,
+    status
+  } = req.query
+
+  const alert = await controler.save({
+    alert_status: Number(status),
+    device_mac: String(mac)
+  })
+
+  if (Number(status) !== 0) {
+    conn.emit('alert', mac, status, alert.created_at)
+    io.emit('alert', mac, status, alert.created_at)
+  }
+
+  res.json(AlertView.render(alert))
+});
 
 app.get('/', controler.index)
 
