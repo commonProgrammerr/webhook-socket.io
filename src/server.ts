@@ -24,7 +24,6 @@ app.post('/', async (req, res) => {
   })
 
   if (Number(status) !== 0) {
-    conn.emit('alert', mac, status, alert.created_at)
     io.emit('alert', mac, status, alert.created_at)
   }
 
