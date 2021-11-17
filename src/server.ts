@@ -7,7 +7,11 @@ import './database/connection';
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*"
+  }
+});
 
 const port = process.env.PORT || 3030;
 
@@ -23,9 +27,14 @@ app.post('/', async (req, res) => {
     device_mac: String(mac)
   })
 
-  if (Number(status) !== 0) {
-    io.emit('alert', mac, status, alert.created_at)
-  }
+
+  io.emit('alert', {
+    id: mac,
+    status: Number(status),
+    date: alert.created_at.toLocaleDateString(),
+    time: alert.created_at.toLocaleTimeString()
+  })
+
 
   res.json(AlertView.render(alert))
 });
