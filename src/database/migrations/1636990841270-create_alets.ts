@@ -35,7 +35,7 @@ export class createAlets1636990841270 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        queryRunner.dropTable('points')
+        queryRunner.dropTable('alerts')
     }
 
 }
