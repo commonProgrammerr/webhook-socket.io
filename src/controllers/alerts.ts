@@ -1,3 +1,4 @@
+import { Server } from 'socket.io'
 import { Request, Response } from 'express';
 import { FindOneOptions, getRepository } from 'typeorm';
 
@@ -25,5 +26,29 @@ export default {
     const alertRepository = getRepository(Alert);
 
     return alertRepository.find(op)
+  },
+
+  alert(io: Server) {
+    return async (req: Request, res: Response) => {
+      const {
+        mac,
+        status
+      } = req.query
+    
+      const alert = await this.save({
+        alert_status: Number(status),
+        device_mac: String(mac)
+      })
+    
+    
+      io.emit('alert', {
+        id: mac,
+        status: Number(status),
+        date: alert.created_at.toLocaleDateString(),
+        time: alert.created_at.toLocaleTimeString()
+      })
+    
+      res.json(AlertView.render(alert))
+    }
   }
 };

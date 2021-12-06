@@ -1,8 +1,10 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import controler from './controllers/alerts';
-import AlertView from './views/alert_view';
+// import AlertsController from './controllers/alerts';
+// import AlertView from './views/alert_view';
+
+import RequestController from './controllers/requests'
 import './database/connection';
 
 const app = express();
@@ -12,55 +14,22 @@ const io = new Server(httpServer, {
     origin: "*"
   }
 });
+app.use(express.json());
 
 const port = process.env.PORT || 3030;
 
-const conn = io.on('connection', async (socket) => console.log('connected:', socket.id))
-app.post('/', async (req, res) => {
-  const {
-    mac,
-    status
-  } = req.query
+io.on('connection', async (socket) => {
+  console.log(socket.id, ' chegou')
+  socket.on('disconnect', () => console.log(socket.id, ' leave...'))  
+})
 
-  const alert = await controler.save({
-    alert_status: Number(status),
-    device_mac: String(mac)
-  })
+// app.post('/alert', AlertsController.alert(io));
 
+// app.get('/alerts', AlertsController.index)
 
-  io.emit('alert', {
-    id: mac,
-    status: Number(status),
-    date: alert.created_at.toLocaleDateString(),
-    time: alert.created_at.toLocaleTimeString()
-  })
-
-
-  res.json(AlertView.render(alert))
-});
-
-app.get('/', controler.index)
-
-
-// io.on('connection', async (socket) => {
-//   const result = await controler.find({
-//     order: {
-//       alert_status: 'ASC'
-//     },
-//     where: [
-//       { alert_status: 1, updated_at: new Date().getDate() },
-//       { alert_status: 3 },
-//     ],
-//     select: ['device_mac', 'alert_status', 'updated_at'],
-//   })
-
-//   result.forEach(alert => io.emit(
-//     'alert',
-//     alert.device_mac,
-//     alert.alert_status,
-//     alert.updated_at
-//   ))
-// });
+app.get('/feed', RequestController.feed)
+app.post('/request/create', RequestController.pop(io))
+app.get('/request', RequestController.find)
 
 
 

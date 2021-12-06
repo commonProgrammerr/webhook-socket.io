@@ -1,7 +1,7 @@
 import Alert from '../models/Alert';
 
 export default {
-  render(alert: Alert, lazy = true) {
+  render(alert: Alert) {
     return {
       id: alert.id,
       alert_status: alert.alert_status,
