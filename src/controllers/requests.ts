@@ -1,110 +1,39 @@
-import assert from 'node:assert';
+import assert, { AssertionError } from 'assert';
 import { Server } from 'socket.io'
 import { Request, Response } from 'express';
-import { FindOneOptions, getRepository } from 'typeorm';
 
-import RequestModel from '../models/Request'
-import RequestView from '../views/requests_view'
-import { RequestsTypes } from './../models/Request'
+let feed = [] as Array<{
+  [key: string]: any
+}>
 
-
-export async function handleCreate(data: Omit<RequestModel, 'id' | 'created_at' | 'updated_at'>) {
-  console.log("Criando novo request");
-  console.log(data)
-  const requestRepository = getRepository(RequestModel);
-
-  const request = requestRepository.create({ ...data });
-
-  return requestRepository.save(request);
-}
+const reports = [] as Array<{
+  oc_id: string,
+  usr_id: string,
+  tool: string,
+  type: string,
+  type_obs?: string
+}>
 
 export default {
-  async index(_req: Request, res: Response) {
-    const requestRepository = getRepository(RequestModel);
-
-    const requests = await requestRepository.find();
-
-    return res.json(RequestView.renderMany(requests));
-  },
-
-  async find(req: Request, res: Response) {
-    const id = String(req.query.id)
-
-    console.log('search for ', { id })
-    try {
-      const requestRepository = getRepository(RequestModel);
-
-      const request_entity = await requestRepository.findOneOrFail({
-        where: { id }
-      })
-
-      if (!request_entity)
-        return res.status(404).json({
-          message: "Inexistent entity"
-        })
-
-      return res.status(200).json(request_entity)
-    } catch (error) {
-      return res.status(500).json({
-        error: (error as Error)?.name,
-        message: (error as Error)?.message
-      })
-    }
-  },
-
-  async create(req: Request, res: Response) {
-    try {
-      const created_response = await handleCreate(req.body)
-
-      return res.status(201).json(created_response)
-
-    } catch (error) {
-      return res.status(400).json({
-        error: (error as Error)?.name,
-        message: (error as Error)?.message
-      })
-    }
-  },
-
-  async feed(req: Request, res: Response) {
-    const page = Number(req.query.page)
-    const per_page = 5
-    const offset = (page ? Number(page) - 1 : 0) * per_page
-    console.log({
-      page,
-      offset
-    })
-
-    const requestRepository = getRepository(RequestModel);
-
-    const requests = await requestRepository.find({
-      select: ['id', 'local', 'box', 'piso', 'type'],
-      order: {
-        created_at: 'DESC'
-      },
-      skip: offset,
-      take: per_page,
-      where: [
-        { type: RequestsTypes.AJUDA },
-        { type: RequestsTypes.ENTUPIMENTO }
-      ]
-    });
-
-    return res.json(RequestView.feed(requests));
-  },
-
-  pop(io: Server) {
+  push(io: Server) {
     return async (req: Request, res: Response) => {
-      console.log('new request')
       try {
-        const new_occurrence = await handleCreate(req.body)
         const {
           id,
+          zone_id,
           box,
           local,
           piso,
           type
-        } = new_occurrence
+        } = req.body
+        console.log('new request ', id)
+
+        assert(id, `Invalid body! Missing the 'id' field.`)
+        assert(zone_id, `Invalid body! Missing the 'zone_id' field.`)
+        assert(box, `Invalid body! Missing the 'box' field.`)
+        assert(local, `Invalid body! Missing the 'local' field.`)
+        assert(piso, `Invalid body! Missing the 'piso' field.`)
+        assert(type, `Invalid body! Missing the 'type' field.`)
 
         assert(
           io.emit('update-feed:new_request', {
@@ -114,17 +43,70 @@ export default {
             piso,
             type
           }),
-          'Socket connection fail!'
+          new Error('Socket connection fail!')
         )
-
-        return res.status(201).json(new_occurrence)
+        feed.push(req.body)
+        return res.status(201).send()
 
       } catch (error) {
-        return res.status(400).json({
-          error: (error as Error)?.name,
-          message: (error as Error)?.message
+        if (error instanceof AssertionError) {
+          return res.status(400).json({
+            code: 'Missing Field',
+            message: error.message
+          })
+        } else {
+          return res.status(500).json({
+            code: (error as Error)?.name,
+            message: (error as Error)?.message
+          })
+        }
+      }
+    }
+  },
+
+  feed_controller: async (req: Request, res: Response) => {
+    return res.status(200).json({
+      feed
+    })
+  },
+
+  find: async (req: Request, res: Response) => {
+    const { oc_id } = req.body
+    return res.status(200).json(feed.find(item => item?.id === oc_id))
+  },
+
+  report(io: Server) {
+    return async (req: Request, res: Response) => {
+      const { oc_id, usr_id, tool, type, type_obs } = req.body
+
+      try {
+        feed = feed.filter(item => item.id !== oc_id)
+        reports.push({ oc_id, usr_id, tool, type, type_obs })
+        assert(
+          io.emit('update-feed:remove', {
+            id: oc_id,
+          }),
+          new Error('Socket connection fail!')
+        )
+        return res.status(200).json({
+          usr_id,
+          oc_id
         })
+      } catch (error) {
+        if (error instanceof AssertionError) {
+          return res.status(400).json({
+            code: 'Missing Field',
+            message: error.message
+          })
+        } else {
+          return res.status(500).json({
+            code: (error as Error)?.name,
+            message: (error as Error)?.message
+          })
+        }
       }
     }
   }
+
+
 };
