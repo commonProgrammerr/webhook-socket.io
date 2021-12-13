@@ -26,7 +26,7 @@ app.post('/request/create', RequestController.push(io))
 app.post('/feed/', RequestController.feed_controller)
 app.post('/search/', RequestController.find)
 app.post('/report', RequestController.report(io))
-app.post('/suport_request', RequestController.find)
+app.post('/suport', RequestController.require_suport(io))
 
 app.post('/auth', (req, res) => {
   const {
