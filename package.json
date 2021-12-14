@@ -15,8 +15,8 @@
   },
   "scripts": {
     "dev": "NODE_ENV=dev ts-node-dev --transpile-only --ignore-watch node_modules ./src/server.ts",
-    "start": "NODE_ENV=prod node ./build/src/server.js",
-    "build": "NODE_ENV=prod tsc && node ./node_modules/typeorm/cli.js migration:run",
+    "start": "cd build; NODE_ENV=prod node src/server.js",
+    "build": "tsc && NODE_ENV=prod node ./node_modules/typeorm/cli.js migration:run",
     "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js"
   },
   "devDependencies": {

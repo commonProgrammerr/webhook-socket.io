@@ -1,16 +1,27 @@
-import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class createRequests1638391210969 implements MigrationInterface {
+export class createEventsTable1639446342653 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         queryRunner.createTable(new Table({
-            name: 'requests',
+            name: 'events',
             columns: [
                 {
                     name: 'id',
                     type: 'varchar',
                     generationStrategy: 'uuid',
                     isPrimary: true
+                },
+                {
+                    name: 'zone_id',
+                    type: 'varchar',
+                    isNullable: false
+                },
+                {
+                    name: 'enable',
+                    type: 'boolean',
+                    isNullable: false,
+                    default: true
                 },
                 {
                     name: 'type',
@@ -20,7 +31,12 @@ export class createRequests1638391210969 implements MigrationInterface {
                 {
                     name: 'local',
                     type: 'varchar',
-                    isNullable: false
+                    isNullable: false,
+                },
+                {
+                    name: 'local_photo',
+                    type: 'varchar',
+                    isNullable: true
                 },
                 {
                     name: 'piso',
@@ -29,16 +45,21 @@ export class createRequests1638391210969 implements MigrationInterface {
                 },
                 {
                     name: 'box',
-                    type: 'integer',
+                    type: 'varchar',
                     isNullable: false
                 },
                 {
-                    name: 'genero',
+                    name: 'banheiro',
                     type: 'varchar',
                     isNullable: false
                 },
                 {
                     name: 'description',
+                    type: 'text',
+                    isNullable: true
+                },
+                {
+                    name: 'tool',
                     type: 'text',
                     isNullable: true
                 },
@@ -62,7 +83,7 @@ export class createRequests1638391210969 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        queryRunner.dropTable('requests')
+        queryRunner.dropTable('events')
     }
 
 }
