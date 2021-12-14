@@ -13,7 +13,7 @@ export default {
     if (usr_log === 'admin' && usr_pass === 'admin')
       return res.status(200).json({
         usr_id: uuid(),
-        usr_grupo: uuid(),
+        usr_grupo: "7e162f65-a23e-46f0-b4c8-c25fcc51484a",
         usr_name: "Administrador",
         usr_ph: undefined,
       })

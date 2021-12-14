@@ -5,10 +5,10 @@ const filesTypes = isProd ?  "*.js" : '*.ts'
 
 module.exports = {
   type: "sqlite",
-  database:  path.resolve(basePath,"database/database.sqlite"),
-  migrations: [path.resolve(basePath,"database/migrations", filesTypes)],
-  entities: [path.resolve(basePath,"models", filesTypes)],
+  database:  path.resolve( basePath,"database/database.sqlite"),
+  migrations: [path.resolve( basePath,"database/migrations", filesTypes)],
+  entities: [path.resolve( basePath,"models", filesTypes)],
   cli:  {
-    migrationsDir: path.resolve(basePath, "database/migrations")
+    migrationsDir: path.resolve( basePath, "database/migrations")
   }
 }
