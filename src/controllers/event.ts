@@ -54,7 +54,7 @@ export default {
         
         const { id, zone_id } = req.body
         await handleCloseEvent(id)
-        io.to(zone_id).emit("@event:close", {
+        io.path(zone_id).emit("@event:close", {
           id,
         } as EventFeedItem)
 
