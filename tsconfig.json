@@ -10,6 +10,6 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "outDir": "./build", // Types should go into this directory. 
     "declaration": true, // Generate d.ts files,
-    "allowJs": true
+    "allowJs": true,
   }
 }
