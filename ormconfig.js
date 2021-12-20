@@ -21,6 +21,9 @@ module.exports = url$ ? {
   url: DATABASE_URL,
   synchronize: true,
   ssl: true,
+  extra: {
+    ssl: true
+  }
 } : {
   ...baseConfig,
   host: DATABASE_URL,
