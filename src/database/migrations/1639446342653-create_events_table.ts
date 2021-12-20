@@ -50,6 +50,11 @@ const columns: TableColumnOptions[] = [
         isNullable: false
     },
     {
+        name: 'mac',
+        type: 'varchar',
+        isNullable: false
+    },
+    {
         name: 'description',
         isNullable: true,
         type: 'text'

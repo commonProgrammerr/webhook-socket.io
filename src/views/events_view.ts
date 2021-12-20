@@ -17,6 +17,7 @@ export default {
       description: event.description,
       local_photo: event.local_photo,
       suport_type: event.suport_type,
+      mac: event.mac,
       tool: event.tool
     };
   },
