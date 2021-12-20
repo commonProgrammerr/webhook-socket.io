@@ -1,5 +1,6 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, getConnection } from "typeorm";
 import { TableColumnOptions } from "typeorm/schema-builder/options/TableColumnOptions";
+import { type } from '../../../ormconfig'
 
 const columns: TableColumnOptions[] = [
     {
@@ -88,9 +89,12 @@ export class createEventsTable1639446342653 implements MigrationInterface {
             columns
         }))
 
-        for (const colunm of columns.filter(col => col.isNullable)) {
-            await queryRunner.query(`ALTER TABLE "${name}" ALTER COLUMN "${colunm.name}" DROP NOT NULL`)
+        if(type === 'postgres') {
+            for (const colunm of columns.filter(col => col.isNullable)) {
+                await queryRunner.query(`ALTER TABLE "${name}" ALTER COLUMN "${colunm.name}" DROP NOT NULL`)
+            }
         }
+
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
