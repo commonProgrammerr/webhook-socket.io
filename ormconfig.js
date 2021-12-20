@@ -18,12 +18,8 @@ const baseConfig = {
 }
 module.exports = url$ ? {
   ...baseConfig,
-  url: DATABASE_URL,
-  synchronize: true,
-  ssl: true,
-  extra: {
-    ssl: true
-  }
+  type: 'sqlite',
+  database: path.resolve(basePath, 'database/database.sqlite')
 } : {
   ...baseConfig,
   host: DATABASE_URL,
