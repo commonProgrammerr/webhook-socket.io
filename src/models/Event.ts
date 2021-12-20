@@ -32,6 +32,9 @@ export default class Event {
 
   @Column()
   banheiro: string
+  
+  @Column()
+  mac: string
 
   @Column()
   description?: string

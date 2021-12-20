@@ -86,12 +86,49 @@ export default {
 
         const { id, zone_id } = req.body
         await handleCloseEvent(id)
-        io.to(zone_id).emit("@event:close", {
+        io.path(zone_id).emit("@event:close", {
           id,
         } as EventFeedItem)
 
         return res.status(200).send()
       } catch (error) {
+        return res.status(500).json({
+          code: 'Internal Error',
+          msg: (error as Error).message
+        })
+      }
+    }
+  },
+
+  send_report(io: Server) {
+    return async (req: Request, res: Response) => {
+      try {
+        const {
+          id,
+          usr_id,
+          tools,
+          type,
+          type_obs,
+          zone_id
+        } = req.body
+
+        const url = 'http://miimo.a4rsolucoes.com.br/apis/report/'
+        await axios.post(url, {
+          usr_id,
+          oc_id: id,
+          tools,
+          type,
+          desc: type_obs
+        })
+        console.log("@event:close -", zone_id)
+        await handleCloseEvent(id)
+        io.path(zone_id).emit("@event:close", {
+          id,
+        } as EventFeedItem)
+
+        res.status(200).send()
+      } catch (error) {
+        console.error(error)
         return res.status(500).json({
           code: 'Internal Error',
           msg: (error as Error).message
@@ -138,15 +175,16 @@ export default {
   notify(io: Server) {
     return async (req: Request, res: Response) => {
       const url = 'http://miimo.a4rsolucoes.com.br/apis/registro/'
-      const { VALOR } = req.query
+      const { VALOR, API } = req.query
       try {
         const response = await axios.get(url, { params: req.query })
         const { data } = response
+        
         if (data.success) {
           if (Number(VALOR) === 1) {
             const infos = data as AspResponse<true>
-            const zone_id = encodeURI(infos.empresa)
-
+            const zone_id = encodeURI(infos.empresa).toLowerCase()
+            console.log(zone_id)
             const {
               id,
               local,
@@ -157,12 +195,13 @@ export default {
               box: infos.box,
               local: infos.posicao,
               piso: infos.piso,
-              type: Number(VALOR),
+              type: 1,
+              mac: String(API),
               zone_id
             })
             console.log("@event:new -", zone_id)
 
-            io.path(req.body.zone_id).emit("@event:new", {
+            io.path(zone_id).emit("@event:new", {
               id,
               local,
               piso,
@@ -175,6 +214,7 @@ export default {
         }
 
       } catch (error) {
+        console.error(error)
         res.status(500).json({
           type: (error as Error).name,
           msg: (error as Error).message

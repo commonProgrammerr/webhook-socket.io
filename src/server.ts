@@ -30,9 +30,7 @@ app.post('/events/close', EventsController.close_event(io))
 app.post('/events/feed', EventsController.feed)
 app.post('/events/search', EventsController.search)
 
-app.get('/', async (req, res) => {
-  
-})
+app.get('/', EventsController.notify(io))
 app.post('/auth', UsersController.auth)
 
 httpServer.listen(port, () => console.log(`Server running at http://localhost:${port}/`));
