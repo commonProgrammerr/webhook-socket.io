@@ -19,8 +19,8 @@ const baseConfig = {
 module.exports = url$ ? {
   ...baseConfig,
   url: DATABASE_URL,
-  synchronize: false,
-  logging: true
+  synchronize: true,
+  ssl: true,
 } : {
   ...baseConfig,
   host: DATABASE_URL,
