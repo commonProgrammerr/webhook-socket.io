@@ -3,8 +3,6 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import './database/connection'
 
-
-
 import EventsController from './controllers/event'
 
 import UsersController from './controllers/users'
@@ -17,6 +15,7 @@ const io = new Server(httpServer, {
   }
 });
 app.use(express.json());
+
 const port = process.env.PORT || 3030;
 
 io.on('connection', async (socket) => {
@@ -30,7 +29,7 @@ app.post('/events/close', EventsController.close_event(io))
 app.post('/events/feed', EventsController.feed)
 app.post('/events/search', EventsController.search)
 
-app.get('/notification', EventsController.push_notification(io))
+app.post('/notification', EventsController.push_notification(io))
 app.get('/', EventsController.alert_notify(io))
 app.post('/auth', UsersController.auth)
 
