@@ -1,4 +1,4 @@
-import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { getRepository } from 'typeorm';
 import { Server } from 'socket.io';
 import { Request, Response } from 'express';
@@ -35,6 +35,12 @@ type AspResponse<R extends boolean> = R extends true
   ? AspSucessResponse
   : AspFailResponse;
 
+const delay = (time: number) => new Promise<void>((resolve, reject) => setTimeout(resolve, time))
+
+const api_server = axios.create({
+  baseURL: 'http://miimo.a4rsolucoes.com.br/apis',
+});
+
 async function handleCreateEvent(data: NewEvent) {
   const repository = getRepository(Event);
   const newEvent = repository.create({
@@ -48,6 +54,19 @@ async function handleCreateEvent(data: NewEvent) {
 
 async function handleCloseEvent(id: string) {
   const repository = getRepository(Event);
+  const a = await repository.findOne(id);
+  const payload = a?.payload && JSON.parse(a?.payload);
+
+  if (a?.type === 3) {
+    if (!payload) {
+      throw new Error('Invalid Event type');
+    }
+    api_server.post('/agenda/atualiza/', {
+      codigo: payload['codigo'],
+      status: 1,
+    });
+  }
+
   return await repository.update(id, {
     enable: false,
   });
@@ -98,9 +117,7 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const { id, usr_id, tools, type, type_obs, zone_id } = req.body;
-
-        const url = 'http://miimo.a4rsolucoes.com.br/apis/report/';
-        await axios.post(url, {
+        await api_server.post('/report/', {
           usr_id,
           oc_id: id,
           tools,
@@ -128,9 +145,7 @@ export default {
     const { id, zone_id } = req.body;
 
     const repository = getRepository(Event);
-    const result = await repository.findOne({
-      where: { id },
-    });
+    const result = await repository.findOne({ where: { id } });
 
     if (!result)
       return res.status(404).json({
@@ -161,22 +176,20 @@ export default {
 
   alert_notify(io: Server) {
     return async (req: Request, res: Response) => {
-      const url = 'http://miimo.a4rsolucoes.com.br/apis/registro/';
+      const url = '/registro/';
       const { VALOR, API } = req.query;
       try {
-        const response = await axios.get(url, { params: req.query });
+        const response = await api_server.get(url, { params: req.query });
         const { data } = response;
-
         if (data.success) {
           if (Number(VALOR) === 1) {
-            const infos = data as AspResponse<true>;
-            const zone_id = encodeURI(infos.empresa).toLowerCase();
-            console.log(zone_id);
+            const payload = data as AspResponse<true>;
+            const zone_id = encodeURI(payload.empresa).toLowerCase();
             const { id, local, piso, type } = await handleCreateEvent({
-              banheiro: infos.local,
-              box: infos.box,
-              local: infos.posicao,
-              piso: infos.piso,
+              banheiro: payload.local,
+              box: payload.box,
+              local: payload.posicao,
+              piso: payload.piso,
               type: 1,
               mac: String(API),
               zone_id,
@@ -207,24 +220,28 @@ export default {
   push_notification(io: Server) {
     return async (req: Request, res: Response) => {
       try {
-        const { local, posicao, piso, type, zone_id, description, title } = req.query;
-        if (!zone_id) {
-          return res.status(400).json({
-            type: 'INVALID_FIELD',
-            msg: "'zone_id' is a required field."
-          })
-        }
-        console.log('@event:push -', zone_id);
+        const payload = req.body as IPush_Data;
+        const zone_id = encodeURI(payload.local_fisico).toLowerCase();
 
-        const result = io.path(encodeURI(String(zone_id))).emit('@event:push', {
-          banheiro: local,
-          local: posicao,
-          piso,
-          title,
-          type,
-          description
+        const { id, local, piso, type } = await handleCreateEvent({
+          banheiro: payload.local,
+          local: payload.posicao,
+          piso: payload.setor,
+          type: 3,
+          zone_id,
+          description: payload.descricao,
+          payload: JSON.stringify(payload),
         });
-        return res.status(200).send()
+        console.log(new Date().toISOString(), '@event:new -', zone_id, id);
+
+        io.emit('@event:new', {
+          id,
+          local,
+          piso,
+          type,
+        } as EventFeedItem);
+
+        return res.status(200).send();
       } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -235,3 +252,32 @@ export default {
     };
   },
 };
+
+interface IPush_Data {
+  codigoItemAgenda: number;
+  grupo: string; //'Administrador',
+  local_fisico: string; //'Aeroporto Internacional dos Guararapes',
+  local: string; //'Banheiro Masculino',
+  setor: string; //'Segundo ANDAR',
+  posicao: string; //'Corredor 001',
+  descricao: string; //'Limpar Piso',
+  dataeventoinicial: string; //'09/04/2022',
+  dataeventofinal: string; //'09/04/2022',
+  horaevento: string; //'18:15:00',
+  status: null;
+}
+
+function required<T>(
+  obj: T,
+  requireds: Array<keyof T>,
+  cb?: (key: keyof T) => any
+) {
+  for (const key of requireds) {
+    if (!obj[key])
+      if (cb) {
+        return cb(key);
+      } else {
+        throw new Error(`'${key}' is a required field.`);
+      }
+  }
+}

@@ -3,7 +3,8 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 export enum EventType {
   REPARO = 1,
   SUPORT = 2,
-  VISTORIA = 3
+  VISTORIA = 3,
+  PEVENTIVO = 0
 }
 
 @Entity('events')
@@ -11,7 +12,7 @@ export default class Event {
 
   @PrimaryGeneratedColumn('uuid')
   id: string
-  
+
   @Column()
   zone_id: string
 
@@ -28,29 +29,32 @@ export default class Event {
   piso: string
 
   @Column()
-  box: string
+  box?: string
 
   @Column()
   banheiro: string
-  
+
   @Column()
-  mac: string
+  mac?: string
 
   @Column()
   description?: string
 
   @Column()
+  payload?: string
+
+  @Column()
   suport_type?: string
-  
+
   @Column()
   local_photo?: string
-  
+
   @Column()
   tool?: string
 
   @CreateDateColumn()
   created_at: Date
-  
+
   @UpdateDateColumn()
   updated_at: Date
 

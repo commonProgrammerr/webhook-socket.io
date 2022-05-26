@@ -43,7 +43,7 @@ const columns: TableColumnOptions[] = [
     {
         name: 'box',
         type: 'varchar',
-        isNullable: false
+        isNullable: true
     },
     {
         name: 'banheiro',
@@ -53,10 +53,15 @@ const columns: TableColumnOptions[] = [
     {
         name: 'mac',
         type: 'varchar',
-        isNullable: false
+        isNullable: true
     },
     {
         name: 'description',
+        isNullable: true,
+        type: 'text'
+    },
+    {
+        name: 'payload',
         isNullable: true,
         type: 'text'
     },
@@ -89,7 +94,7 @@ export class createEventsTable1639446342653 implements MigrationInterface {
             columns
         }))
 
-        if(type === 'postgres') {
+        if (type === 'postgres') {
             for (const colunm of columns.filter(col => col.isNullable)) {
                 await queryRunner.query(`ALTER TABLE "${name}" ALTER COLUMN "${colunm.name}" DROP NOT NULL`)
             }

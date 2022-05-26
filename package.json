@@ -23,9 +23,11 @@
     "db:create": "node ./databaseconfig.js && ts-node ./node_modules/typeorm/cli.js migration:run",
     "db:drop": "ts-node ./node_modules/typeorm-extension/dist/cli/index.js db:drop",
     "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js",
-    "build": "tsc && cross-env NODE_ENV=prod ts-node ./node_modules/typeorm/cli.js migration:run",
+    "build": "rm -r ./build && tsc && cross-env NODE_ENV=prod ts-node ./node_modules/typeorm/cli.js migration:run",
     "start": "cross-env NODE_ENV=prod node build/src/server.js",
     "dev": "cross-env NODE_ENV=dev ts-node-dev --transpile-only --ignore-watch node_modules ./src/server.ts"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "body-parser": "^1.20.0"
+  }
 }
