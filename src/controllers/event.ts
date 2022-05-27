@@ -35,10 +35,12 @@ type AspResponse<R extends boolean> = R extends true
   ? AspSucessResponse
   : AspFailResponse;
 
-const delay = (time: number) => new Promise<void>((resolve, reject) => setTimeout(resolve, time))
+const delay = (time: number) =>
+  new Promise<void>((resolve, reject) => setTimeout(resolve, time));
 
 const api_server = axios.create({
-  baseURL: 'http://miimo.a4rsolucoes.com.br/apis',
+  // baseURL: 'http://miimo.a4rsolucoes.com.br/apis',
+  baseURL: 'http://192.168.15.86:81/apis',
 });
 
 async function handleCreateEvent(data: NewEvent) {
@@ -54,14 +56,14 @@ async function handleCreateEvent(data: NewEvent) {
 
 async function handleCloseEvent(id: string) {
   const repository = getRepository(Event);
-  const a = await repository.findOne(id);
+  const a = await repository.findOne({ where: { id } });
   const payload = a?.payload && JSON.parse(a?.payload);
 
   if (a?.type === 3) {
     if (!payload) {
       throw new Error('Invalid Event type');
     }
-    api_server.post('/agenda/atualiza/', {
+    await api_server.post('/agenda/atualiza/', {
       codigo: payload['codigo'],
       status: 1,
     });
@@ -105,6 +107,11 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
+        console.log({
+          code: 'Internal Error',
+          msg: (error as Error).message,
+          res: (error as any).response,
+        });
         return res.status(500).json({
           code: 'Internal Error',
           msg: (error as Error).message,
