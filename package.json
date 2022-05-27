@@ -1,6 +1,6 @@
 {
-  "name": "socket-chat-example",
-  "version": "0.0.1",
+  "name": "maint-api",
+  "version": "0.12.01",
   "description": "my first socket.io app",
   "dependencies": {
     "@types/express": "^4.17.13",
