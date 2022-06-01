@@ -39,8 +39,9 @@ const delay = (time: number) =>
   new Promise<void>((resolve, reject) => setTimeout(resolve, time));
 
 const api_server = axios.create({
-  // baseURL: 'http://miimo.a4rsolucoes.com.br/apis',
-  baseURL: 'http://192.168.15.86:81/apis',
+  // baseURL: 'http://miimo.a4rsolucoes.com.br/apis' // online,
+  baseURL: 'http://192.168.15.86:81/apis', // casa
+  // baseURL: 'http://192.168.230.221:81/apis', // 4G
 });
 
 async function handleCreateEvent(data: NewEvent) {
@@ -63,10 +64,13 @@ async function handleCloseEvent(id: string) {
     if (!payload) {
       throw new Error('Invalid Event type');
     }
-    await api_server.post('/agenda/atualiza/', {
+    console.log(payload);
+    const resp = await api_server.post('/agenda/atualiza/', {
       codigo: payload['codigo'],
       status: 1,
     });
+
+    console.log(resp.status);
   }
 
   return await repository.update(id, {
@@ -123,13 +127,15 @@ export default {
   send_report(io: Server) {
     return async (req: Request, res: Response) => {
       try {
-        const { id, usr_id, tools, type, type_obs, zone_id } = req.body;
+        const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
+          req.body;
         await api_server.post('/report/', {
           usr_id,
           oc_id: id,
           tools,
           type,
           desc: type_obs,
+          rest,
         });
         console.log('@event:close -', zone_id);
         await handleCloseEvent(id);
@@ -180,11 +186,42 @@ export default {
       feed: View.feed(result),
     });
   },
+  async acept(req: Request, res: Response) {
+    const { id, data } = req.body;
+    try {
+      const repository = getRepository(Event);
+      const a = await repository.findOne({ where: { id } });
+      const payload = a?.payload && JSON.parse(a?.payload);
+
+      if (a?.type === 3) {
+        if (!payload) {
+          return res.status(400).json({
+            message: 'Invalid Event type',
+          });
+        }
+        const resp = await api_server.post('/agenda/atualiza/', {
+          codigo: payload['codigo'],
+          status: 3,
+        });
+
+        console.log(resp.status);
+      }
+
+      return res.status(200).send();
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        type: (error as Error).name,
+        msg: (error as Error).message,
+      });
+    }
+  },
 
   alert_notify(io: Server) {
     return async (req: Request, res: Response) => {
       const url = '/registro/';
       const { VALOR, API } = req.query;
+      console.log(VALOR, API);
       try {
         const response = await api_server.get(url, { params: req.query });
         const { data } = response;
@@ -246,6 +283,7 @@ export default {
           local,
           piso,
           type,
+          time: payload.horaevento,
         } as EventFeedItem);
 
         return res.status(200).send();

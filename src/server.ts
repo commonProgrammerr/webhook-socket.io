@@ -32,5 +32,6 @@ app.post('/events/search', EventsController.search)
 app.post('/notification', EventsController.push_notification(io))
 app.get('/', EventsController.alert_notify(io))
 app.post('/auth', UsersController.auth)
+app.post('/acept', EventsController.acept)
 
 httpServer.listen(port, () => console.log(`Server running at http://localhost:${port}/`));
