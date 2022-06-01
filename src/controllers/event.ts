@@ -39,8 +39,8 @@ const delay = (time: number) =>
   new Promise<void>((resolve, reject) => setTimeout(resolve, time));
 
 const api_server = axios.create({
-  // baseURL: 'http://miimo.a4rsolucoes.com.br/apis' // online,
-  baseURL: 'http://192.168.15.86:81/apis', // casa
+  baseURL: 'http://miimo.a4rsolucoes.com.br/apis' // online,
+  // baseURL: 'http://192.168.15.86:81/apis', // casa
   // baseURL: 'http://192.168.230.221:81/apis', // 4G
 });
 
