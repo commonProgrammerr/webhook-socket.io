@@ -276,7 +276,7 @@ export default {
           description: payload.descricao,
           payload: JSON.stringify(payload),
         });
-        console.log(new Date().toISOString(), '@event:new -', zone_id, id);
+        // console.log(new Date().toISOString(), '@event:new -', zone_id, id);
 
         io.emit('@event:new', {
           id,
