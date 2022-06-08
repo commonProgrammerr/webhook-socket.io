@@ -158,7 +158,7 @@ export default {
     const { id, zone_id } = req.body;
 
     const repository = getRepository(Event);
-    const result = await repository.findOne({ where: { id } });
+    const result = await repository.findOne({ where: { id, zone_id } });
 
     if (!result)
       return res.status(404).json({
@@ -170,19 +170,29 @@ export default {
 
   async feed(req: Request, res: Response) {
     const { page, zone_id } = req.body;
+
+    if (page <= 0) {
+      return res.status(400).json({
+        msg: 'Invalid page'
+      })
+    }
+
     const page_size = 5;
-    const offset = page * page_size - page_size;
+    const offset = ((page ?? 1) - 1) * page_size;
 
     const repository = getRepository(Event);
     const result = await repository.find({
-      where: { zone_id, enable: true },
+      where: { enable: true },
       order: {
         created_at: 'DESC',
       },
+      skip: offset,
+      take: page_size
+
     });
 
     return res.status(200).json({
-      page: 1,
+      page,
       feed: View.feed(result),
     });
   },
