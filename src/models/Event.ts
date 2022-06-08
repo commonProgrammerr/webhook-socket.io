@@ -1,62 +1,65 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum EventType {
   REPARO = 1,
   SUPORT = 2,
   VISTORIA = 3,
-  PEVENTIVO = 0
+  PEVENTIVO = 0,
 }
 
 @Entity('events')
 export default class Event {
-
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
-  @Column()
-  zone_id: string
+  @Column('text')
+  zone_id: string;
 
-  @Column()
-  enable?: boolean
+  @Column({ type: 'boolean', nullable: true })
+  enable?: boolean | null;
 
   @Column('integer')
-  type: EventType
+  type: EventType;
 
-  @Column()
-  local: string
+  @Column({ type: 'text' })
+  local: string;
 
-  @Column()
-  piso: string
+  @Column({ type: 'text' })
+  piso: string;
 
-  @Column()
-  box?: string
+  @Column({ type: 'text', nullable: true })
+  box?: string | null;
 
-  @Column()
-  banheiro: string
+  @Column({ type: 'text' })
+  banheiro: string;
 
-  @Column()
-  mac?: string
+  @Column({ type: 'text', nullable: true })
+  mac?: string | null;
 
-  @Column()
-  description?: string
+  @Column({ type: 'text', nullable: true })
+  description?: string | null;
 
-  @Column()
-  payload?: string
+  @Column({ type: 'text', nullable: true })
+  payload?: string | null;
 
-  @Column()
-  suport_type?: string
+  @Column({ type: 'text', nullable: true })
+  suport_type?: string | null;
 
-  @Column()
-  local_photo?: string
+  @Column({ type: 'text', nullable: true })
+  local_photo?: string | null;
 
-  @Column()
-  tool?: string
+  @Column({ type: 'text', nullable: true })
+  tool?: string | null;
 
   @CreateDateColumn()
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn()
-  updated_at: Date
-
-
+  updated_at: Date;
 }
