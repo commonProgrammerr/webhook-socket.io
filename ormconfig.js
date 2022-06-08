@@ -24,17 +24,12 @@ module.exports = {
   // type: 'sqlite',
   // database: path.resolve(basePath, 'database/database.sqlite'),
   type: 'postgres',
-  database: isProd ? 'maint_app' : 'dev_maint_app',
   migrations: [path.resolve(basePath, 'database/migrations', filesTypes)],
   entities: [path.resolve(basePath, 'models', filesTypes)],
   cli: {
     migrationsDir: path.resolve(basePath, 'database/migrations'),
   },
-  // host: isProd ? BASE_URL : 'localhost',
   url,
   synchronize: false,
   logging: true,
-  // port: 5432,
-  // username: 'maint',
-  // password: 'maint',
 };
