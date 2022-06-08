@@ -1,12 +1,15 @@
 const path = require('path');
 // const { createConnection } = require('typeorm');
 
-const isProd = process.env.NODE_ENV === 'prod';
+const isProd =
+  process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'production';
 const basePath = isProd ? './build/src' : './src';
 const filesTypes = isProd ? '*.js' : '*.ts';
-const DATABASE_URL = process.env.DATABASE_URL || 'localhost';
-console.log(DATABASE_URL);
-// const url$ = !!process.env.DATABASE_URL;
+const url = isProd
+  ? process.env.DATABASE_URL
+  : `postgres://maint:maint@localhost:5432/dev_maint_app`;
+
+console.log(url);
 
 const baseConfig = {
   // type: 'postgres',
@@ -28,9 +31,7 @@ module.exports = {
     migrationsDir: path.resolve(basePath, 'database/migrations'),
   },
   // host: isProd ? BASE_URL : 'localhost',
-  url: isProd
-    ? DATABASE_URL
-    : `postgres://maint:maint@localhost:5432/dev_maint_app`,
+  url,
   extra: isProd
     ? {
         ssl: true,
