@@ -32,11 +32,6 @@ module.exports = {
   },
   // host: isProd ? BASE_URL : 'localhost',
   url,
-  extra: isProd
-    ? {
-        ssl: true,
-      }
-    : undefined,
   synchronize: false,
   logging: true,
   // port: 5432,
