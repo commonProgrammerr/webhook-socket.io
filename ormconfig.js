@@ -30,6 +30,11 @@ module.exports = {
     migrationsDir: path.resolve(basePath, 'database/migrations'),
   },
   url,
+  extra: isProd
+    ? {
+        ssl: true,
+      }
+    : undefined,
   synchronize: false,
-  logging: true,
+  logging: isProd,
 };
