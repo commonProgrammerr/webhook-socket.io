@@ -158,7 +158,7 @@ export default {
     const { id, zone_id } = req.body;
 
     const repository = getRepository(Event);
-    const result = await repository.findOne({ where: { id, zone_id } });
+    const result = await repository.findOne({ where: { id } });
 
     if (!result)
       return res.status(404).json({
@@ -196,6 +196,7 @@ export default {
       feed: View.feed(result),
     });
   },
+
   async acept(req: Request, res: Response) {
     const { id, data } = req.body;
     try {
