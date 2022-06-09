@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { v4 as uuid } from 'uuid';
 
 export enum EventType {
   REPARO = 1,
@@ -15,6 +16,11 @@ export enum EventType {
 
 @Entity('events')
 export default class Event {
+
+  constructor() {
+    this.id = uuid()
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
