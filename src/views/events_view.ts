@@ -1,8 +1,9 @@
 import Event from '../models/Event';
 
-export type EventDTO = Omit<Event, 'enable' | 'updated_at' | 'zone_id'>
-export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'>
-
+export type EventDTO = Omit<Event, 'enable' | 'updated_at' | 'zone_id'>;
+export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'> & {
+  time?: string;
+};
 
 export default {
   render(event: Event): EventDTO {
@@ -18,7 +19,7 @@ export default {
       local_photo: event.local_photo,
       suport_type: event.suport_type,
       mac: event.mac,
-      tool: event.tool
+      tool: event.tool,
     };
   },
 
@@ -32,8 +33,9 @@ export default {
         id: event.id,
         local: event.local,
         piso: event.piso,
-        type: event.type
-      }
+        type: event.type,
+        time: (event.payload && JSON.parse(event.payload)).horaevento
+      };
     });
-  }
+  },
 };
