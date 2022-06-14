@@ -23,6 +23,7 @@ type AspSucessResponse = {
   posicao: string;
   piso: string;
   box: string;
+  timestamp: string
 };
 
 type AspFailResponse = {
@@ -39,7 +40,7 @@ const delay = (time: number) =>
   new Promise<void>((resolve, reject) => setTimeout(resolve, time));
 
 const api_server = axios.create({
-  baseURL: 'http://miimo.a4rsolucoes.com.br/apis' // online,
+  baseURL: 'http://miimo.a4rsolucoes.com.br/apis', // online,
   // baseURL: 'http://192.168.15.86:81/apis', // casa
   // baseURL: 'http://192.168.230.221:81/apis', // 4G
 });
@@ -173,8 +174,8 @@ export default {
 
     if (page <= 0) {
       return res.status(400).json({
-        msg: 'Invalid page'
-      })
+        msg: 'Invalid page',
+      });
     }
 
     const page_size = 5;
@@ -187,8 +188,7 @@ export default {
         created_at: 'DESC',
       },
       skip: offset,
-      take: page_size
-
+      take: page_size,
     });
 
     return res.status(200).json({
@@ -232,7 +232,7 @@ export default {
     return async (req: Request, res: Response) => {
       const url = '/registro/';
       const { VALOR, API } = req.query;
-      console.log("query: ", req.query);
+      console.log('query: ', req.query);
       try {
         const response = await api_server.get(url, { params: req.query });
         const { data } = response;
@@ -250,12 +250,14 @@ export default {
               zone_id,
             });
             console.log('@event:new -', zone_id);
+            const time = new Date().toISOString()
 
             io.path(zone_id).emit('@event:new', {
               id,
               local,
               piso,
               type,
+              time
             } as EventFeedItem);
           }
           res.status(200).send();
@@ -288,13 +290,16 @@ export default {
           payload: JSON.stringify(payload),
         });
         // console.log(new Date().toISOString(), '@event:new -', zone_id, id);
-
+        const date_array = payload?.dataeventoinicial?.split('/');
+        const time =
+          payload.timestamp ||
+          `${date_array[2]}-${date_array[1]}-${date_array[0]}T${payload.horaevento}.000-03:00`;
         io.emit('@event:new', {
           id,
           local,
           piso,
           type,
-          time: payload.horaevento,
+          time,
         } as EventFeedItem);
 
         return res.status(200).send();
@@ -309,7 +314,7 @@ export default {
   },
 };
 
-interface IPush_Data {
+export interface IPush_Data {
   codigoItemAgenda: number;
   grupo: string; //'Administrador',
   local_fisico: string; //'Aeroporto Internacional dos Guararapes',
@@ -320,7 +325,8 @@ interface IPush_Data {
   dataeventoinicial: string; //'09/04/2022',
   dataeventofinal: string; //'09/04/2022',
   horaevento: string; //'18:15:00',
-  status: null;
+  status: number;
+  timestamp: string;
 }
 
 function required<T>(

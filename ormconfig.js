@@ -28,10 +28,6 @@ module.exports = {
     migrationsDir: path.resolve(basePath, 'database/migrations'),
   },
   url,
-  ssl: {
-    ca: process.env.SSL_CERT,
-    rejectUnauthorized: false,
-  },
   extra: isProd
     ? {
         ssl: {
