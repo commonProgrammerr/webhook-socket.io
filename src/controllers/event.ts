@@ -212,7 +212,7 @@ export default {
         }
         const resp = await api_server.post('/agenda/atualiza/', {
           codigo: payload['codigo'],
-          status: 3,
+          status: 2,
         });
 
         console.log(resp.status);
