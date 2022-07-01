@@ -8,7 +8,7 @@ const filesTypes = isProd ? '*.js' : '*.ts';
 const url = isProd
   ? process.env.DATABASE_URL
   : `postgres://maint:maint@localhost:5432/dev_maint_app`;
-
+console.log(url);
 const baseConfig = {
   // type: 'postgres',
   // database: isProd ? 'maint_app' : 'dev_maint_app',

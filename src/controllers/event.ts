@@ -4,7 +4,8 @@ import { Server } from 'socket.io';
 import { Request, Response } from 'express';
 import Event from '../models/Event';
 import View, { EventFeedItem } from '../views/events_view';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { validate } from 'class-validator';
 
 type NewEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'enable'>;
 
@@ -23,7 +24,7 @@ type AspSucessResponse = {
   posicao: string;
   piso: string;
   box: string;
-  timestamp: string
+  timestamp: string;
 };
 
 type AspFailResponse = {
@@ -47,13 +48,19 @@ const api_server = axios.create({
 
 async function handleCreateEvent(data: NewEvent) {
   const repository = getRepository(Event);
-  const newEvent = repository.create({
+  let newEvent = repository.create({
     ...data,
     id: uuid(),
     enable: true,
     created_at: new Date(),
   });
-  return repository.save(newEvent);
+
+  const errors = await validate(newEvent);
+  if (errors.length > 0) {
+    throw new Error(`Validation failed! Wrong field.`);
+  } else {
+    return repository.save(newEvent);
+  }
 }
 
 async function handleCloseEvent(id: string) {
@@ -112,15 +119,15 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
-        console.log({
-          code: 'Internal Error',
-          msg: (error as Error).message,
-          res: (error as any).response,
-        });
-        return res.status(500).json({
-          code: 'Internal Error',
-          msg: (error as Error).message,
-        });
+        if ((error as AxiosError)?.isAxiosError) {
+          const err = error as AxiosError;
+          res.status(err.response?.status || 400).json(err.response?.data);
+        } else {
+          res.status(500).json({
+            type: 'Internal Error',
+            msg: (error as Error).message,
+          });
+        }
       }
     };
   },
@@ -146,11 +153,15 @@ export default {
 
         res.status(200).send();
       } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-          code: 'Internal Error',
-          msg: (error as Error).message,
-        });
+        if ((error as AxiosError)?.isAxiosError) {
+          const err = error as AxiosError;
+          res.status(err.response?.status || 400).json(err.response?.data);
+        } else {
+          return res.status(500).json({
+            type: 'Internal Error',
+            msg: (error as Error).message,
+          });
+        }
       }
     };
   },
@@ -220,11 +231,15 @@ export default {
 
       return res.status(200).send();
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        type: (error as Error).name,
-        msg: (error as Error).message,
-      });
+      if ((error as AxiosError)?.isAxiosError) {
+        const err = error as AxiosError;
+        res.status(err.response?.status || 400).json(err.response?.data);
+      } else {
+        res.status(500).json({
+          type: (error as Error).name,
+          msg: (error as Error).message,
+        });
+      }
     }
   },
 
@@ -250,14 +265,14 @@ export default {
               zone_id,
             });
             console.log('@event:new -', zone_id);
-            const time = new Date().toISOString()
+            const time = new Date().toISOString();
 
             io.path(zone_id).emit('@event:new', {
               id,
               local,
               piso,
               type,
-              time
+              time,
             } as EventFeedItem);
           }
           res.status(200).send();
@@ -265,11 +280,15 @@ export default {
           res.status(400).json(response);
         }
       } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          type: (error as Error).name,
-          msg: (error as Error).message,
-        });
+        if ((error as AxiosError)?.isAxiosError) {
+          const err = error as AxiosError;
+          res.status(err.response?.status || 400).json(err.response?.data);
+        } else {
+          res.status(500).json({
+            type: (error as Error).name,
+            msg: (error as Error).message,
+          });
+        }
       }
     };
   },
@@ -304,7 +323,7 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
-        console.error(error);
+        console.error(`${(error as any).name}:`, (error as any).message);
         res.status(500).json({
           type: (error as Error).name || 'UNKNOWN',
           msg: (error as Error).message,
@@ -339,7 +358,7 @@ function required<T>(
       if (cb) {
         return cb(key);
       } else {
-        throw new Error(`'${key}' is a required field.`);
+        throw new Error(`'${key as string}' is a required field.`);
       }
   }
 }
