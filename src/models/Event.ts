@@ -1,3 +1,4 @@
+import { MinLength } from 'class-validator';
 import {
   Entity,
   Column,
@@ -25,6 +26,7 @@ export default class Event {
   id: string;
 
   @Column('text')
+  @MinLength(1)
   zone_id: string;
 
   @Column({ type: 'boolean', nullable: true })
@@ -33,16 +35,19 @@ export default class Event {
   @Column('integer')
   type: EventType;
 
-  @Column({ type: 'text' })
+  @Column('text')
+  @MinLength(1)
   local: string;
 
-  @Column({ type: 'text' })
+  @Column('text')
+  @MinLength(1)
   piso: string;
 
   @Column({ type: 'text', nullable: true })
   box?: string | null;
 
-  @Column({ type: 'text' })
+  @Column('text')
+  @MinLength(1)
   banheiro: string;
 
   @Column({ type: 'text', nullable: true })

@@ -22,7 +22,6 @@ io.on('connection', async (socket) => {
   console.log(socket.id, ' chegou')
   socket.on('disconnect', () => console.log(socket.id, ' leave...'))
 })
-console.log(process.env.DATABASE_URL)
 
 app.post('/events/new', EventsController.push_event(io))
 app.post('/events/close', EventsController.close_event(io))
