@@ -137,13 +137,13 @@ export default {
       try {
         const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
           req.body;
-        await api_server.post('/report/', {
+        await api_server.post('/reporte/', {
           usr_id,
           oc_id: id,
           tools,
           type,
           desc: type_obs,
-          rest,
+          ...rest,
         });
         console.log('@event:close -', zone_id);
         await handleCloseEvent(id);
