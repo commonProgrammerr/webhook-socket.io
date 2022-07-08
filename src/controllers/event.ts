@@ -143,7 +143,7 @@ export default {
           tools,
           type,
           desc: type_obs,
-          rest,
+          ...rest,
         });
         console.log('@event:close -', zone_id);
         await handleCloseEvent(id);
