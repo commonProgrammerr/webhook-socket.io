@@ -36,6 +36,7 @@ export default {
       suport_type: event.suport_type,
       mac: event.mac,
       tool: event.tool,
+      payload: event.payload
     };
   },
 

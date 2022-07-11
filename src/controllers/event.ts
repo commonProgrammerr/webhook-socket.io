@@ -63,9 +63,9 @@ async function handleCreateEvent(data: NewEvent) {
   }
 }
 
-async function handleCloseEvent(id: string) {
+async function handleCloseEvent(id: string, ev?: Event) {
   const repository = getRepository(Event);
-  const a = await repository.findOne({ where: { id } });
+  const a = ev || (await repository.findOne({ where: { id } }));
   const payload = a?.payload && JSON.parse(a?.payload);
 
   if (a?.type === 3) {
@@ -113,15 +113,16 @@ export default {
       try {
         const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
           req.body;
+        const event = (await getRepository(Event).findOne({ where: { id } }));
         await api_server.post('/report/', {
           usr_id,
-          oc_id: id,
+          oc_id: event?.payload && JSON.parse(event.payload).codigo || id,
           tools,
           type,
           desc: type_obs,
           ...rest,
         });
-        await handleCloseEvent(id);
+        const closed_event = await handleCloseEvent(id, event);
 
         io.path(zone_id).emit('@event:close', {
           id,
@@ -129,7 +130,7 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
-        console.error((error as Error).message)
+        console.error((error as Error).message);
         if ((error as AxiosError)?.isAxiosError) {
           const err = error as AxiosError;
           res.status(err.response?.status || 400).json(err.response?.data);
