@@ -111,33 +111,9 @@ export default {
   close_event(io: Server) {
     return async (req: Request, res: Response) => {
       try {
-        const { id, zone_id } = req.body;
-        await handleCloseEvent(id);
-        io.path(zone_id).emit('@event:close', {
-          id,
-        } as EventFeedItem);
-
-        return res.status(200).send();
-      } catch (error) {
-        if ((error as AxiosError)?.isAxiosError) {
-          const err = error as AxiosError;
-          res.status(err.response?.status || 400).json(err.response?.data);
-        } else {
-          res.status(500).json({
-            type: 'Internal Error',
-            msg: (error as Error).message,
-          });
-        }
-      }
-    };
-  },
-
-  send_report(io: Server) {
-    return async (req: Request, res: Response) => {
-      try {
         const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
           req.body;
-        await api_server.post('/reporte/', {
+        await api_server.post('/report/', {
           usr_id,
           oc_id: id,
           tools,
@@ -145,19 +121,20 @@ export default {
           desc: type_obs,
           ...rest,
         });
-        console.log('@event:close -', zone_id);
         await handleCloseEvent(id);
+
         io.path(zone_id).emit('@event:close', {
           id,
         } as EventFeedItem);
 
-        res.status(200).send();
+        return res.status(200).send();
       } catch (error) {
+        console.error((error as Error).message)
         if ((error as AxiosError)?.isAxiosError) {
           const err = error as AxiosError;
           res.status(err.response?.status || 400).json(err.response?.data);
         } else {
-          return res.status(500).json({
+          res.status(500).json({
             type: 'Internal Error',
             msg: (error as Error).message,
           });
