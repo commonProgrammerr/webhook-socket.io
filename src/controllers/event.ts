@@ -114,6 +114,7 @@ export default {
         const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
           req.body;
         const event = (await getRepository(Event).findOne({ where: { id } }));
+        console.log(event?.payload && JSON.parse(event.payload).codigo || id,)
         await api_server.post('/report/', {
           usr_id,
           oc_id: event?.payload && JSON.parse(event.payload).codigo || id,
@@ -130,11 +131,12 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
-        console.error((error as Error).message);
         if ((error as AxiosError)?.isAxiosError) {
           const err = error as AxiosError;
+          console.error(err.response?.data)
           res.status(err.response?.status || 400).json(err.response?.data);
         } else {
+          console.error((error as Error).message);
           res.status(500).json({
             type: 'Internal Error',
             msg: (error as Error).message,
