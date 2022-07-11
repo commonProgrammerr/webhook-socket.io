@@ -130,11 +130,12 @@ export default {
 
         return res.status(200).send();
       } catch (error) {
-        console.error((error as Error).message);
         if ((error as AxiosError)?.isAxiosError) {
           const err = error as AxiosError;
+          console.error(err.response?.data)
           res.status(err.response?.status || 400).json(err.response?.data);
         } else {
+          console.error((error as Error).message);
           res.status(500).json({
             type: 'Internal Error',
             msg: (error as Error).message,
