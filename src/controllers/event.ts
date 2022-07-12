@@ -108,6 +108,43 @@ export default {
       }
     };
   },
+  suport_event(io: Server) {
+    return async (req: Request, res: Response) => {
+      try {
+        const original = await getRepository(Event).findOneOrFail(req.body.id)
+        const { id, local, piso, type, zone_id } = await handleCreateEvent({
+          banheiro: original.banheiro,
+          local: original.local,
+          piso: original.piso,
+          zone_id: original.zone_id,
+          box: original.box,
+          description: original.description,
+          local_photo: original.local_photo,
+          mac: original.mac,
+          payload: original.payload,
+          suport_type: original.suport_type,
+          tool: original.tool,
+          ...req.body,
+          type: 2
+        });
+
+        console.log('@event:suport -', zone_id);
+        io.path(zone_id).emit('@event:new', {
+          id,
+          local,
+          piso,
+          type,
+        } as EventFeedItem);
+
+        return res.status(201).send();
+      } catch (error) {
+        return res.status(500).json({
+          code: 'Internal Error',
+          msg: (error as Error).message,
+        });
+      }
+    };
+  },
   close_event(io: Server) {
     return async (req: Request, res: Response) => {
       try {
@@ -116,7 +153,7 @@ export default {
         const event = (await getRepository(Event).findOne({ where: { id } }));
         console.log({
           usr_id,
-          oc_id: event?.payload && JSON.parse(event.payload).codigo || id,
+          oc_id: event?.payload && JSON.parse(event.payload).codigo || "",
           tools,
           type,
           desc: type_obs,
@@ -269,6 +306,7 @@ export default {
       } catch (error) {
         if ((error as AxiosError)?.isAxiosError) {
           const err = error as AxiosError;
+          console.error(err.response?.data)
           res.status(err.response?.status || 400).json(err.response?.data);
         } else {
           res.status(500).json({
@@ -279,6 +317,7 @@ export default {
       }
     };
   },
+
 
   push_notification(io: Server) {
     return async (req: Request, res: Response) => {

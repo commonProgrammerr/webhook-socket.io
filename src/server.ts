@@ -24,6 +24,7 @@ io.on('connection', async (socket) => {
 })
 
 app.post('/events/new', EventsController.push_event(io))
+app.post('/events/suport', EventsController.suport_event(io))
 app.post('/events/close', EventsController.close_event(io))
 app.post('/events/feed', EventsController.feed)
 app.post('/events/search', EventsController.search)
