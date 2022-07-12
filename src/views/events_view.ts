@@ -49,7 +49,7 @@ export default {
       const payload = JSON.parse(event.payload || '{}') as EventPayload;
       const date_array = payload?.dataeventoinicial?.split('/');
       const timestamp =
-        (event.type === 1)
+        (event.type !== 3)
           ? event.created_at.toISOString()
           : payload.timestamp ||
           `${date_array[2]}-${date_array[1]}-${date_array[0]}T${payload.horaevento}.000-03:00`;
