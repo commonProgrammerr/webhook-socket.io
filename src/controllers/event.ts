@@ -287,7 +287,7 @@ export default {
               type: 1,
               mac: String(API),
               zone_id,
-              payload: JSON.stringify({ ...payload, codigo: payload.dispositivo })
+              payload: JSON.stringify({ ...payload, codigo: String(API) })
             });
             console.log('@event:new -', zone_id);
             const time = new Date().toISOString();
