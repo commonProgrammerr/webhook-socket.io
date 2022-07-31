@@ -7,7 +7,7 @@ const columns: TableColumnOptions[] = [
         name: 'id',
         type: 'varchar',
         generationStrategy: 'uuid',
-        isPrimary: true
+        isPrimary: true,
     },
     {
         name: 'zone_id',
@@ -66,14 +66,16 @@ const columns: TableColumnOptions[] = [
         type: 'text'
     },
     {
-        name: 'tool',
-        isNullable: true,
-        type: 'text'
+        name: 'requisitor',
+        type: 'timestamp',
     },
     {
-        name: 'suport_type',
-        isNullable: true,
-        type: 'text'
+        name: 'start',
+        type: 'timestamp',
+    },
+    {
+        name: 'end',
+        type: 'timestamp',
     },
     {
         name: 'created_at',
@@ -81,6 +83,11 @@ const columns: TableColumnOptions[] = [
     },
     {
         name: 'updated_at',
+        type: 'timestamp',
+        isNullable: true,
+    },
+    {
+        name: 'deleted_at',
         type: 'timestamp',
         isNullable: true,
     }
