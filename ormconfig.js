@@ -8,8 +8,8 @@ const filesTypes = isProd ? '*.js' : '*.ts';
 
 const url = isProd
   ? process.env.DATABASE_URL
-  : 'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
-// `postgres://maint:maint@localhost:5432/dev_maint_app`;
+  : // : 'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
+    `postgres://postgres:postgres@localhost:5432/dev_maint_app`;
 const baseConfig = {
   // type: 'postgres',
   // database: isProd ? 'maint_app' : 'dev_maint_app',
@@ -22,11 +22,12 @@ const baseConfig = {
 
 console.log('connecting to', url);
 module.exports = {
-  type: 'mysql',
+  type: 'postgres',
   migrations: [path.resolve(basePath, 'database/migrations', filesTypes)],
   entities: [path.resolve(basePath, 'models', filesTypes)],
   cli: {
     migrationsDir: path.resolve(basePath, 'database/migrations'),
+    entitiesDir: path.resolve(basePath, 'models'),
   },
   url,
   extra: isProd

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 import { TableColumnOptions } from "typeorm/schema-builder/options/TableColumnOptions";
 const name = 'dispositivos'
 const columns: TableColumnOptions[] = [
@@ -11,12 +11,12 @@ const columns: TableColumnOptions[] = [
     {
         name: 'nome',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'mac',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
         isUnique: true
     },
     {
@@ -35,14 +35,14 @@ const columns: TableColumnOptions[] = [
         isNullable: true,
     },
     {
-        name: 'zone_id',
+        name: 'zonaId',
         type: 'varchar',
-        isNullable: false,
-        isUnique: true
+        isNullable: true,
     },
     {
         name: 'created_at',
         type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'updated_at',
@@ -62,7 +62,15 @@ export class createDispistivosTable1659297789402 implements MigrationInterface {
             name,
             columns
         }), true)
-
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["zonaId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "zonas",
+                onDelete: "CASCADE",
+            }),
+        )
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

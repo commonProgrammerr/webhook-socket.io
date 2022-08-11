@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 import { TableColumnOptions } from "typeorm/schema-builder/options/TableColumnOptions";
 const columns: TableColumnOptions[] = [
     {
@@ -8,45 +8,30 @@ const columns: TableColumnOptions[] = [
         isPrimary: true,
     },
     {
-        name: 'zone_id',
-        type: 'varchar',
-        isNullable: false
-    },
-    {
-        name: 'grupo_id',
-        type: 'varchar',
-        isNullable: false
-    },
-    {
-        name: 'reporter_id',
-        type: 'varchar',
-        isNullable: false
-    },
-    {
         name: 'enable',
         type: 'boolean',
-        isNullable: false,
+        isNullable: true,
         default: true
     },
     {
         name: 'tipo',
         type: 'integer',
-        isNullable: false
+        isNullable: true
     },
     {
         name: 'local',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'piso',
         type: 'varchar',
-        isNullable: false
+        isNullable: true
     },
     {
         name: 'banheiro',
         type: 'varchar',
-        isNullable: false
+        isNullable: true
     },
     {
         name: 'description',
@@ -59,16 +44,44 @@ const columns: TableColumnOptions[] = [
         type: 'text'
     },
     {
-        name: 'start',
+        name: 'inicio',
         type: 'timestamp',
+        isNullable: true,
     },
     {
-        name: 'end',
+        name: 'fim',
         type: 'timestamp',
+        isNullable: true,
+    },
+    {
+        name: 'relatorioId',
+        type: 'varchar',
+        isNullable: true
+    },
+    {
+        name: 'zonaId',
+        type: 'varchar',
+        isNullable: true
+    },
+    {
+        name: 'dispositivoId',
+        type: 'varchar',
+        isNullable: true
+    },
+    {
+        name: 'reporterId',
+        type: 'varchar',
+        isNullable: true
+    },
+    {
+        name: 'send_at',
+        type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'created_at',
         type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'updated_at',
@@ -81,7 +94,7 @@ const columns: TableColumnOptions[] = [
         isNullable: true,
     }
 ]
-const name = 'events'
+const name = 'eventos'
 
 export class createEventosTable1659297926505 implements MigrationInterface {
 
@@ -91,6 +104,33 @@ export class createEventosTable1659297926505 implements MigrationInterface {
             columns
         }), true)
 
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["zonaId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "zonas",
+                onDelete: "CASCADE",
+            }),
+        )
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["dispositivoId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "dispositivos",
+                onDelete: "CASCADE",
+            }),
+        )
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["reporterId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "usuarios",
+                onDelete: "CASCADE",
+            }),
+        )
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

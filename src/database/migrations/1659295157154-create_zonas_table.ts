@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 import { TableColumnOptions } from "typeorm/schema-builder/options/TableColumnOptions";
 const name = 'zonas'
 const columns: TableColumnOptions[] = [
@@ -11,40 +11,42 @@ const columns: TableColumnOptions[] = [
     {
         name: 'nome',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'local',
         type: 'varchar',
-        isNullable: false,
-        isUnique: true
+        isNullable: true,
     },
     {
         name: 'piso',
         type: 'varchar',
-        isNullable: false,
-        isUnique: true
+        isNullable: true,
     },
     {
         name: 'map_path',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'tipo',
         type: 'varchar',
+        isNullable: true,
     },
     {
-        name: 'predio_id',
+        name: 'predioId',
         type: 'varchar',
+        isNullable: true,
     },
     {
-        name: 'grupo_id',
+        name: 'grupoId',
         type: 'varchar',
+        isNullable: true,
     },
     {
         name: 'created_at',
         type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'updated_at',
@@ -65,7 +67,24 @@ export class createZonasTable1659295157154 implements MigrationInterface {
             name,
             columns
         }), true)
-
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["predioId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "predios",
+                onDelete: "CASCADE",
+            }),
+        )
+        await queryRunner.createForeignKey(
+            name,
+            new TableForeignKey({
+                columnNames: ["grupoId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "grupos",
+                onDelete: "CASCADE",
+            }),
+        )
 
     }
 

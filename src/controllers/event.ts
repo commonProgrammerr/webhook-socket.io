@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { getRepository } from 'typeorm';
 import { Server } from 'socket.io';
 import { Request, Response } from 'express';
-import Event from '../models/Event';
+import Event from '../database/migrations/Event';
 import View, { EventFeedItem } from '../views/events_view';
 import axios, { AxiosError } from 'axios';
 import { validate } from 'class-validator';

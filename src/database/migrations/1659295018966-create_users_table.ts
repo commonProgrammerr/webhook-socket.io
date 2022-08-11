@@ -12,30 +12,33 @@ const columns: TableColumnOptions[] = [
     {
         name: 'nome',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'email',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
         isUnique: true
     },
     {
         name: 'senha',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'tipo',
         type: 'varchar',
+        isNullable: true,
     },
     {
-        name: 'grupo_id',
+        name: 'grupoId',
         type: 'varchar',
+        isNullable: true,
     },
     {
         name: 'created_at',
         type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'updated_at',

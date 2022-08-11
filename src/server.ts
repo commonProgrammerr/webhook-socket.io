@@ -1,37 +1,64 @@
-import express, { Request } from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import './database/connection'
-
-import EventsController from './controllers/event'
-
-import UsersController from './controllers/users'
+import 'reflect-metadata';
+import express, { Request } from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import './database/connection';
+import EventsController from './controllers/event';
+import { buildSchema } from 'type-graphql';
+import path from 'path';
+import { graphqlHTTP } from 'express-graphql';
+import { createComplexityRule, fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
+import { GraphQLError } from 'graphql';
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*"
-  }
-});
-app.use(express.json());
+async function appConfig() {
+  const schema = await buildSchema({
+    resolvers: [path.resolve('src/resolvers/*.ts')],
+    nullableByDefault: true,
+    emitSchemaFile: true,
+  });
+  app.use('/graphql', graphqlHTTP((req, res, params) => ({
+    schema,
+    graphiql: true,
+    validationRules: [
+      createComplexityRule({
+        maximumComplexity: 20,
+        estimators: [
+          fieldExtensionsEstimator(),
+          simpleEstimator({
+            defaultComplexity: 1
+          })
+        ],
+        variables: {
+          ...params?.variables,
+        },
+        onComplete(complexity) {
+          console.log('Determined query complexity: ', complexity);
+        },
+        createError(max, actual) {
+          return new GraphQLError(
+            `Query is too complex: ${actual}. Maximum allowed complexity: ${max}`
+          );
+        },
+      }),
+    ],
+  })))
 
+  return app;
+}
+
+appConfig()
+// const httpServer = createServer(app);
+// const io = new Server(httpServer, {
+//   cors: {
+//     origin: '*',
+//   },
+// });
+
+app.use(express.json());
+// app.use('/graphql', )
 const port = process.env.PORT || 3030;
 
-io.on('connection', async (socket) => {
-  console.log(socket.id, ' chegou')
-  socket.on('disconnect', () => console.log(socket.id, ' leave...'))
-})
-
-app.post('/events/new', EventsController.push_event(io))
-app.post('/events/suport', EventsController.suport_event(io))
-app.post('/events/close', EventsController.close_event(io))
-app.post('/events/feed', EventsController.feed)
-app.post('/events/search', EventsController.search)
-
-app.post('/notification', EventsController.push_notification(io))
-app.get('/', EventsController.alert_notify(io))
-app.post('/auth', UsersController.auth)
-app.post('/acept', EventsController.acept)
-
-httpServer.listen(port, () => console.log(`Server running at http://localhost:${port}/`));
+app.listen(port, () =>
+  console.log(`Server running at http://localhost:${port}/`)
+);

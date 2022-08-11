@@ -11,15 +11,17 @@ const columns: TableColumnOptions[] = [
     {
         name: 'nome',
         type: 'varchar',
-        isNullable: false,
+        isNullable: true,
     },
     {
         name: 'tipo',
         type: 'varchar',
+        isNullable: true,
     },
     {
         name: 'created_at',
         type: 'timestamp',
+        isNullable: true,
     },
     {
         name: 'updated_at',

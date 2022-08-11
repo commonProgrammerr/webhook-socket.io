@@ -1,5 +1,5 @@
 import { IPush_Data } from '../controllers/event';
-import Event from '../models/Event';
+import Event from '../database/migrations/Event';
 
 export type EventDTO = Omit<Event, 'enable' | 'updated_at' | 'zone_id'>;
 export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'> & {
