@@ -36,6 +36,19 @@ input CreatePredioInput {
   zonasIds: [String!]
 }
 
+input CreateRelatorioInput {
+  atividades: String
+  deleted_at: DateTime
+  description: String
+  dispositivoId: String
+  enviadoPorId: String
+  eventoId: String
+  ferramenta: String
+  payload: String
+  usuarioId: String
+  zonaId: String
+}
+
 input CreateUsuarioInput {
   deleted_at: DateTime
   email: String
@@ -114,6 +127,7 @@ type Mutation {
   createEvento(data: CreateEventoInput): Evento
   createGrupo(data: CreateGrupoInput): Grupo
   createPredio(data: CreatePredioInput): Predio
+  createRelatorio(data: CreateRelatorioInput): Relatorio
   createUsuario(data: CreateUsuarioInput): Usuario
   createZona(data: CreateZonaInput): Zona
   delete(id: ID): Zona
@@ -121,6 +135,7 @@ type Mutation {
   updateEvento(data: CreateEventoInput, id: ID): Evento
   updateGrupo(data: CreateGrupoInput, id: ID): Grupo
   updatePredio(data: CreatePredioInput, id: ID): Predio
+  updateRelatorio(data: CreateRelatorioInput, id: ID): Relatorio
   updateUsuario(data: CreateUsuarioInput, id: ID): Usuario
   updateZona(data: CreateZonaInput, id: ID): Zona
 }
@@ -144,6 +159,8 @@ type Query {
   grupos: [Grupo]
   predio(id: ID): Predio
   predios(search: String): [Predio]
+  relatorio(id: ID): Relatorio
+  relatorios(search: SearchRelatorioInput): [Relatorio]
   usuario(id: ID): Usuario
   usuarios(search: String): [Usuario]
   zona(id: ID): Zona
@@ -176,6 +193,19 @@ input SearchEventoInput {
   piso: String
   send_at: DateTime
   tipo: Float
+  usuarioId: String
+  zonaId: String
+}
+
+input SearchRelatorioInput {
+  atividades: String
+  deleted_at: DateTime
+  description: String
+  dispositivoId: String
+  enviadoPorId: String
+  eventoId: String
+  ferramenta: String
+  payload: String
   usuarioId: String
   zonaId: String
 }
