@@ -6,9 +6,9 @@ const isProd =
 const basePath = isProd ? './build/src' : './src';
 const filesTypes = isProd ? '*.js' : '*.ts';
 
-const url = isProd
-  ? process.env.DATABASE_URL
-  : 'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
+const url =
+  'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
+// : 'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
 // `postgres://postgres:postgres@localhost:5432/dev_maint_app`;
 
 console.log('connecting to', url);
@@ -21,14 +21,15 @@ module.exports = {
     entitiesDir: path.resolve(basePath, 'models'),
   },
   url,
-  extra: isProd
-    ? {
-        ssl: {
-          ca: process.env.SSL_CERT,
-          rejectUnauthorized: false,
-        },
-      }
-    : undefined,
+  // extra: isProd
+  //   ? {
+  //       ssl: {
+  //         ca: process.env.SSL_CERT,
+  //         rejectUnauthorized: false,
+  //       },
+  //     }
+  //   : undefined,
   synchronize: false,
-  logging: isProd,
+  // logging: isProd,
+  logging: false,
 };
