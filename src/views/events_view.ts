@@ -1,6 +1,6 @@
 import Event from '../models/Event';
 
-export type EventDTO = Omit<Event, 'enable' | 'updated_at' | 'zone_id'>
+export type EventDTO = Omit<Partial<Event>, 'enable' | 'updated_at' | 'zone_id'>
 export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'>
 
 
@@ -15,10 +15,7 @@ export default {
       piso: event.piso,
       type: event.type,
       description: event.description,
-      local_photo: event.local_photo,
-      suport_type: event.suport_type,
-      mac: event.mac,
-      tool: event.tool
+      mac: event.mac
     };
   },
 

@@ -12,13 +12,19 @@ import { v4 as uuid } from 'uuid';
 export enum EventType {
   REPARO = 1,
   SUPORT = 2,
-  VISTORIA = 3,
-  PEVENTIVO = 0,
+  PEVENTIVO = 3,
+}
+
+export enum Status {
+  PROGRAMADO = 0,
+  EXECUTADO = 1,
+  EM_ANDAMENTO = 2,
+  ENVIADO = 3
 }
 
 @Entity('events')
 export default class Event extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('increment')
   id: string;
 
   @Column({ type: 'text', nullable: true })
@@ -27,9 +33,11 @@ export default class Event extends BaseEntity {
   @Column({ type: 'boolean', nullable: true })
   enable?: boolean | null;
 
-  @Column('integer')
-  @MinLength(1)
-  zone_id: number;
+  @Column('integer', { nullable: true })
+  zone_id?: number;
+
+  @Column('integer', { nullable: true })
+  status?: Status;
 
   @Column('integer')
   type: EventType;
@@ -52,7 +60,6 @@ export default class Event extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   mac?: string | null;
 
-
   @Column({ type: 'integer', nullable: true })
   relatorio_id?: number;
 
@@ -61,6 +68,9 @@ export default class Event extends BaseEntity {
 
   @Column({ type: 'integer', nullable: true })
   request_by?: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  data_agendamento?: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   inicio?: Date;

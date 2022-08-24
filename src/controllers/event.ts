@@ -246,8 +246,8 @@ export default {
               piso: payload.piso,
               type: 1,
               mac: String(API),
-              zone_id,
-            });
+              zone_id: 1,
+            } as any);
             console.log('@event:new -', zone_id);
 
             io.path(zone_id).emit('@event:new', {
@@ -275,7 +275,8 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const payload = req.body as IPush_Data;
-        const zone_id = encodeURI(payload.local_fisico).toLowerCase();
+        const zone_id = 0;
+        // encodeURI(payload.local_fisico).toLowerCase();
 
         const { id, local, piso, type } = await handleCreateEvent({
           banheiro: payload.local,
@@ -285,7 +286,7 @@ export default {
           zone_id,
           description: payload.descricao,
           payload: JSON.stringify(payload),
-        });
+        } as any);
         // console.log(new Date().toISOString(), '@event:new -', zone_id, id);
 
         io.emit('@event:new', {
@@ -332,7 +333,7 @@ function required<T>(
       if (cb) {
         return cb(key);
       } else {
-        throw new Error(`'${key}' is a required field.`);
+        throw new Error(`'${key as string}' is a required field.`);
       }
   }
 }
