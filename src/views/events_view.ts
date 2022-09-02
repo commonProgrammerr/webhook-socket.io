@@ -1,15 +1,8 @@
 import { IPush_Data } from '../controllers/event';
 import Event from '../models/Event';
 
-<<<<<<< HEAD
-export type EventDTO = Omit<Event, 'enable' | 'updated_at' | 'zone_id'>;
-export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'> & {
-  time?: string | null;
-};
-=======
 export type EventDTO = Omit<Partial<Event>, 'enable' | 'updated_at' | 'zone_id'>
 export type EventFeedItem = Pick<Event, 'id' | 'type' | 'local' | 'piso'>
->>>>>>> dev
 
 interface EventPayload {
   codigoItemAgenda: number;
@@ -37,15 +30,7 @@ export default {
       piso: event.piso,
       type: event.type,
       description: event.description,
-<<<<<<< HEAD
-      local_photo: event.local_photo,
-      suport_type: event.suport_type,
-      mac: event.mac,
-      tool: event.tool,
-      payload: event.payload
-=======
       mac: event.mac
->>>>>>> dev
     };
   },
 
