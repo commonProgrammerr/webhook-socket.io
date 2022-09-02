@@ -119,17 +119,14 @@ export default {
           zone_id: original.zone_id,
           box: original.box,
           description: original.description,
-          local_photo: original.local_photo,
           mac: original.mac,
           payload: original.payload,
-          suport_type: original.suport_type,
-          tool: original.tool,
           ...req.body,
           type: 2
         });
 
         console.log('@event:suport -', zone_id);
-        io.path(zone_id).emit('@event:new', {
+        io.emit('@event:new', {
           id,
           local,
           piso,
@@ -286,9 +283,8 @@ export default {
               piso: payload.piso,
               type: 1,
               mac: String(API),
-              zone_id,
-              payload: JSON.stringify({ ...payload, codigo: String(API) })
-            });
+              zone_id: 1,
+            } as any);
             console.log('@event:new -', zone_id);
             const time = new Date().toISOString();
 
@@ -324,7 +320,8 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const payload = req.body as IPush_Data;
-        const zone_id = encodeURI(payload.local_fisico).toLowerCase();
+        const zone_id = 0;
+        // encodeURI(payload.local_fisico).toLowerCase();
 
         const { id, local, piso, type } = await handleCreateEvent({
           banheiro: payload.local,
@@ -334,7 +331,7 @@ export default {
           zone_id,
           description: payload.descricao,
           payload: JSON.stringify(payload),
-        });
+        } as any);
         // console.log(new Date().toISOString(), '@event:new -', zone_id, id);
         const date_array = payload?.dataeventoinicial?.split('/');
         const time =
