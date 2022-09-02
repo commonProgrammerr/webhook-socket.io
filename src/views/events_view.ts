@@ -40,20 +40,12 @@ export default {
 
   feed(events: Event[]): EventFeedItem[] {
     return events.map((event) => {
-      const payload = JSON.parse(event.payload || '{}') as EventPayload;
-      const date_array = payload?.dataeventoinicial?.split('/');
-      const timestamp =
-        (event.type !== 3)
-          ? event.created_at.toISOString()
-          : payload.timestamp ||
-          `${date_array[2]}-${date_array[1]}-${date_array[0]}T${payload.horaevento}.000-03:00`;
-
       return {
         id: event.id,
         local: event.local,
         piso: event.piso,
         type: event.type,
-        time: event.payload && timestamp,
+        time: event.data_agendamento,
       };
     });
   },
