@@ -222,6 +222,7 @@ export default {
       take: page_size,
     });
 
+
     return res.status(200).json({
       page,
       feed: View.feed(result),
@@ -229,25 +230,32 @@ export default {
   },
 
   async acept(req: Request, res: Response) {
-    const { id, data } = req.body;
+    const { id, user_id } = req.body;
     try {
-      const repository = getRepository(Event);
-      const a = await repository.findOne({ where: { id } });
-      const payload = a?.payload && JSON.parse(a?.payload);
 
-      if (a?.type === 3) {
-        if (!payload) {
-          return res.status(400).json({
-            message: 'Invalid Event type',
-          });
-        }
-        const resp = await api_server.post('/agenda/atualiza/', {
-          codigo: payload['codigo'],
-          status: 2,
-        });
-
-        console.log(resp.status);
+      const event = await Event.findOne({ where: { id } });
+      if (event) {
+        event.inicio = new Date();
+        event.compleated_by = user_id
+        event.save();
       }
+      // const repository = getRepository(Event);
+      // const a = await repository.findOne({ where: { id } });
+      // const payload = a?.payload && JSON.parse(a?.payload);
+
+      // if (a?.type === 3) {
+      //   if (!payload) {
+      //     return res.status(400).json({
+      //       message: 'Invalid Event type',
+      //     });
+      //   }
+      //   const resp = await api_server.post('/agenda/atualiza/', {
+      //     codigo: payload['codigo'],
+      //     status: 2,
+      //   });
+
+      //   console.log(resp.status);
+      // }
 
       return res.status(200).send();
     } catch (error) {

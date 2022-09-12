@@ -22,6 +22,23 @@ const port = process.env.PORT || 3030;
 io.on('connection', async (socket) => {
   console.log(socket.id, ' chegou');
   socket.on('disconnect', () => console.log(socket.id, ' leave...'));
+  socket.on('loging', (user) => {
+  })
+  socket.on('acept', async (data) => {
+    const { id, user } = data;
+    const event = await Event.findOne({ where: { id } });
+    if (event) {
+      event.inicio = new Date();
+      event.compleated_by = user
+      event.save();
+    }
+
+
+    // const resp = await api_server.post('/agenda/atualiza/', {
+    //   codigo: payload['codigo'],
+    //   status: 2,
+    // });
+  })
 });
 
 console.log(process.env.DATABASE_URL);
