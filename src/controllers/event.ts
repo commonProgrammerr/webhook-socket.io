@@ -202,9 +202,9 @@ export default {
   },
 
   async feed(req: Request, res: Response) {
-    const { page, zone_id } = req.body;
+    const { page, user_id } = req.body;
 
-    if (page <= 0) {
+    if (page <= 0 || !user_id) {
       return res.status(400).json({
         msg: 'Invalid page',
       });
@@ -213,9 +213,8 @@ export default {
     const page_size = 5;
     const offset = ((page ?? 1) - 1) * page_size;
 
-    const repository = getRepository(Event);
-    const result = await repository.find({
-      where: { enable: true },
+    const result = await Event.find({
+      where: [{ enable: true }, { enable: false, compleated_by: user_id, fim: null }],
       order: {
         created_at: 'DESC',
       },
