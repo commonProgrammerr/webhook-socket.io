@@ -21,11 +21,17 @@ import Predio from './Predio';
 import Usuario from './Usuario';
 import Zona from './Zona';
 
-export enum EventType {
+export enum TipoEvento {
   REPARO = 1,
   SUPORT = 2,
   VISTORIA = 3,
   PEVENTIVO = 0,
+}
+export enum StatusEvento {
+  EM_ATENDIMENTO = 0,
+  ENVIADO = 1,
+  AGENDADO = 2,
+  URGENTE = 3,
 }
 
 @Entity('eventos')
@@ -76,9 +82,13 @@ export default class Evento extends BaseEntity {
   @Column('timestamp', { nullable: true })
   fim: Date | null;
 
+  @Field(() => Number)
+  @Column('integer', { nullable: true })
+  status?: StatusEvento
+
   @Field(() => Date)
   @Column('timestamp', { nullable: true })
-  send_at: Date | null
+  data_agendamento?: Date
 
   @Field(() => Zona, { nullable: true })
   @OneToOne((type) => Zona, { nullable: true })
