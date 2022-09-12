@@ -6,8 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  OneToOne,
+  JoinColumn,
+  RelationId,
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import User from './User';
 
 export enum EventType {
   REPARO = 1,
@@ -63,8 +67,23 @@ export default class Event extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   relatorio_id?: number;
 
-  @Column({ type: 'integer', nullable: true })
+  @OneToOne((type) => User, { nullable: true })
+  @JoinColumn({ name: 'compleated_by' })
+  compleatedBy?: User;
+
+  @Column('integer', { nullable: true })
   compleated_by?: number;
+
+  @OneToOne((type) => User, { nullable: true })
+  @JoinColumn({ name: 'request_by' })
+  requestBy?: User;
+
+  @Column('integer', { nullable: true })
+  apoio_de?: number;
+
+  @OneToOne((type) => Event, { nullable: true })
+  @JoinColumn({ name: 'apoio_de' })
+  apoioDe?: Event;
 
   @Column({ type: 'integer', nullable: true })
   request_by?: number;

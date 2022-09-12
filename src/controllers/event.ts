@@ -6,8 +6,9 @@ import Event from '../models/Event';
 import View, { EventFeedItem } from '../views/events_view';
 import axios, { AxiosError } from 'axios';
 import { validate } from 'class-validator';
+import User from '../models/User'
 
-type NewEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'enable'>;
+type NewEvent = Omit<Partial<Event>, 'id' | 'created_at' | 'updated_at' | 'enable'>;
 
 type AspSucessResponse = {
   id: string;
@@ -50,9 +51,7 @@ async function handleCreateEvent(data: NewEvent) {
   const repository = getRepository(Event);
   let newEvent = repository.create({
     ...data,
-    id: uuid(),
     enable: true,
-    created_at: new Date(),
   });
 
   const errors = await validate(newEvent);
@@ -112,7 +111,7 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const original = await getRepository(Event).findOneOrFail(req.body.id)
-        const { id, local, piso, type, zone_id } = await handleCreateEvent({
+        const { id, local, piso, type, zone_id, request_by } = await handleCreateEvent({
           banheiro: original.banheiro,
           local: original.local,
           piso: original.piso,
@@ -121,17 +120,20 @@ export default {
           description: original.description,
           mac: original.mac,
           payload: original.payload,
-          ...req.body,
+          request_by: req.body.user_id,
+          apoio_de: req.body.id,
           type: 2
         });
+        const requisitor = await User.findOne(request_by)
 
-        console.log('@event:suport -', zone_id);
+        console.log('@event:suport', zone_id);
         io.emit('@event:new', {
           id,
           local,
           piso,
           type,
-        } as EventFeedItem);
+          request_by: requisitor?.nome
+        });
 
         return res.status(201).send();
       } catch (error) {
@@ -145,31 +147,15 @@ export default {
   close_event(io: Server) {
     return async (req: Request, res: Response) => {
       try {
-        const { id, usr_id, tools, type, type_obs, zone_id, ...rest } =
-          req.body;
-        const event = (await getRepository(Event).findOne({ where: { id } }));
-        console.log({
-          usr_id,
-          oc_id: event?.payload && JSON.parse(event.payload).codigo || "",
-          tools,
-          type,
-          desc: type_obs,
-          ...rest,
-        })
-        await api_server.post('/report/', {
-          usr_id,
-          oc_id: event?.payload && JSON.parse(event.payload).codigo || id,
-          tools,
-          type,
-          desc: type_obs,
-          ...rest,
-        });
-        const closed_event = await handleCloseEvent(id, event);
-
-        io.path(zone_id).emit('@event:close', {
-          id,
-        } as EventFeedItem);
-
+        const { id } = req.body;
+        const event = await Event.findOne({ where: { id } });
+        if (event) {
+          event.fim = new Date();
+          await event.save()
+          io.emit('@event:close', {
+            id: event.id,
+          } as EventFeedItem);
+        }
         return res.status(200).send();
       } catch (error) {
         if ((error as AxiosError)?.isAxiosError) {
@@ -188,15 +174,19 @@ export default {
   },
 
   async search(req: Request, res: Response) {
-    const { id, zone_id } = req.body;
+    const { id } = req.body;
+    const result = await Event.findOne({
+      where: { id },
+      relations: [
+        'requestBy'
+      ]
+    });
 
-    const repository = getRepository(Event);
-    const result = await repository.findOne({ where: { id } });
-
-    if (!result)
+    if (!result) {
       return res.status(404).json({
         msg: 'Inexistent or invalid ID entity',
       });
+    }
 
     return res.status(200).json(View.render(result));
   },
@@ -229,44 +219,36 @@ export default {
     });
   },
 
-  async acept(req: Request, res: Response) {
-    const { id, user_id } = req.body;
-    try {
+  acept(io: Server) {
+    return async (req: Request, res: Response) => {
+      const { id, user_id } = req.body;
+      try {
 
-      const event = await Event.findOne({ where: { id } });
-      if (event) {
-        event.inicio = new Date();
-        event.compleated_by = user_id
-        event.save();
-      }
-      // const repository = getRepository(Event);
-      // const a = await repository.findOne({ where: { id } });
-      // const payload = a?.payload && JSON.parse(a?.payload);
+        const event = await Event.findOne({ where: { id } });
+        if (event) {
+          event.enable = false;
+          event.inicio = new Date();
+          event.compleated_by = user_id
+          event.save();
+        }
 
-      // if (a?.type === 3) {
-      //   if (!payload) {
-      //     return res.status(400).json({
-      //       message: 'Invalid Event type',
-      //     });
-      //   }
-      //   const resp = await api_server.post('/agenda/atualiza/', {
-      //     codigo: payload['codigo'],
-      //     status: 2,
-      //   });
 
-      //   console.log(resp.status);
-      // }
-
-      return res.status(200).send();
-    } catch (error) {
-      if ((error as AxiosError)?.isAxiosError) {
-        const err = error as AxiosError;
-        res.status(err.response?.status || 400).json(err.response?.data);
-      } else {
-        res.status(500).json({
-          type: (error as Error).name,
-          msg: (error as Error).message,
+        io.emit('@event:get', {
+          id,
+          user_id
         });
+
+        return res.status(200).send();
+      } catch (error) {
+        if ((error as AxiosError)?.isAxiosError) {
+          const err = error as AxiosError;
+          res.status(err.response?.status || 400).json(err.response?.data);
+        } else {
+          res.status(500).json({
+            type: (error as Error).name,
+            msg: (error as Error).message,
+          });
+        }
       }
     }
   },

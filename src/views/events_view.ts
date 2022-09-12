@@ -23,14 +23,15 @@ export default {
   render(event: Event): EventDTO {
     return {
       id: event.id,
-      banheiro: event.banheiro,
-      box: event.box,
-      created_at: event.created_at,
-      local: event.local,
-      piso: event.piso,
-      type: event.type,
-      description: event.description,
-      mac: event.mac
+      banheiro: event.banheiro ?? undefined,
+      box: event.box ?? undefined,
+      created_at: event.created_at ?? undefined,
+      local: event.local ?? undefined,
+      piso: event.piso ?? undefined,
+      type: event.type ?? undefined,
+      description: event.description ?? undefined,
+      mac: event.mac ?? undefined,
+      requestBy: event.requestBy ?? undefined
     };
   },
 
