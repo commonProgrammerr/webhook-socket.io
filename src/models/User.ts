@@ -10,7 +10,7 @@ export default class User extends BaseEntity {
   @PrimaryGeneratedColumn('increment', {
     name: 'codigo',
   })
-  id: string;
+  id: number;
 
   @Column('varchar', { length: 100 })
   usuario: string;
