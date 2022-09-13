@@ -118,7 +118,7 @@ export default {
           piso: original.piso,
           zone_id: original.zone_id,
           box: original.box,
-          description: original.description,
+          description: req.body.description,
           mac: original.mac,
           payload: original.payload,
           request_by: req.body.user_id,
