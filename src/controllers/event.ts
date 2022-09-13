@@ -7,6 +7,7 @@ import View, { EventFeedItem } from '../views/events_view';
 import axios, { AxiosError } from 'axios';
 import { validate } from 'class-validator';
 import User from '../models/User'
+import Agenda from '../models/Agenda';
 
 type NewEvent = Omit<Partial<Event>, 'id' | 'created_at' | 'updated_at' | 'enable'>;
 
@@ -111,7 +112,7 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const original = await getRepository(Event).findOneOrFail(req.body.id)
-        const { id, local, piso, type, zone_id, request_by } = await handleCreateEvent({
+        const suport_event = await handleCreateEvent({
           banheiro: original.banheiro,
           local: original.local,
           piso: original.piso,
@@ -124,6 +125,26 @@ export default {
           apoio_de: req.body.id,
           type: 2
         });
+        const { id, local, piso, type, zone_id, request_by } = suport_event
+
+        if (original.type === 3) {
+          const item_agenda = Agenda.create([
+            {
+              cod_grupo_resp: suport_event.zone_id,
+              finalizado_em: suport_event.fim,
+              execucao_em: suport_event.inicio,
+              dataeventoinicial: suport_event.data_agendamento,
+              dataeventofinal: suport_event.data_agendamento,
+              DESCRICAO: suport_event.description,
+              cod_dispositivo: suport_event.mac,
+              cod_usu_solicitante: suport_event.request_by,
+              status: suport_event.status,
+              horaevento: suport_event.data_agendamento?.toTimeString()
+            }
+          ])
+          item_agenda[0].save()
+        }
+
         const requisitor = await User.findOne(request_by)
 
         console.log('@event:suport', zone_id);
