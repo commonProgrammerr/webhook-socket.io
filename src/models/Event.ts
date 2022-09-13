@@ -29,13 +29,13 @@ export enum Status {
 @Entity('events')
 export default class Event extends BaseEntity {
   @PrimaryGeneratedColumn('increment')
-  id: string;
+  id: number;
 
   @Column({ type: 'text', nullable: true })
-  description?: string | null;
+  description?: string;
 
   @Column({ type: 'boolean', nullable: true })
-  enable?: boolean | null;
+  enable?: boolean;
 
   @Column('integer', { nullable: true })
   zone_id?: number;
@@ -55,14 +55,14 @@ export default class Event extends BaseEntity {
   piso: string;
 
   @Column({ type: 'text', nullable: true })
-  box?: string | null;
+  box?: string;
 
   @Column('text')
   @MinLength(1)
   banheiro: string;
 
   @Column({ type: 'text', nullable: true })
-  mac?: string | null;
+  mac?: string;
 
   @Column({ type: 'integer', nullable: true })
   relatorio_id?: number;
@@ -78,10 +78,10 @@ export default class Event extends BaseEntity {
   @JoinColumn({ name: 'request_by' })
   requestBy?: User;
 
-  @Column('integer', { nullable: true })
+  @Column('integer', { nullable: true, unique: false })
   apoio_de?: number;
 
-  @OneToOne((type) => Event, { nullable: true })
+  @OneToOne((type) => Event, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'apoio_de' })
   apoioDe?: Event;
 
@@ -98,11 +98,11 @@ export default class Event extends BaseEntity {
   fim?: Date;
 
   @Column({ type: 'text', nullable: true })
-  payload?: string | null;
+  payload?: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 }
