@@ -77,26 +77,10 @@ app.post('/events/feed', EventsController.feed);
 app.post('/events/search', EventsController.search);
 app.post('/events/suport', EventsController.suport_event(io));
 
-app.post('/notification', EventsController.push_notification(io));
 app.get('/', EventsController.alert_notify(io));
 app.post('/acept', EventsController.acept(io));
-app.post('/agenda', (req, res) => {
-  const {
-    type,
-    tools,
-    camera,
-    images,
-    papel,
-    toalhas,
-    sabao,
-    sanitario,
-    mictorio,
-    lavador,
-    espelhos,
-    chao,
-    lixo,
-  } = req.body;
-});
+app.post('/notification', EventsController.push_notification(io));
+
 
 httpServer.listen(port, () =>
   console.log(`Server running at http://localhost:${port}/`)

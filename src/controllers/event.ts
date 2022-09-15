@@ -8,6 +8,7 @@ import axios, { AxiosError } from 'axios';
 import { validate } from 'class-validator';
 import User from '../models/User'
 import Agenda from '../models/Agenda';
+import Device from '../models/Device';
 
 type NewEvent = Omit<Partial<Event>, 'id' | 'created_at' | 'updated_at' | 'enable'>;
 
@@ -49,17 +50,38 @@ const api_server = axios.create({
 });
 
 async function handleCreateEvent(data: NewEvent) {
-  const repository = getRepository(Event);
-  let newEvent = repository.create({
-    ...data,
-    enable: true,
-  });
+  try {
+    const repository = getRepository(Event);
+    return await repository.manager.transaction(async manager => {
 
-  const errors = await validate(newEvent);
-  if (errors.length > 0) {
-    throw new Error(`Validation failed! Wrong field.`);
-  } else {
-    return repository.save(newEvent);
+      let newEvent = Event.create<Event>({
+        ...data,
+        enable: true,
+      });
+      const errors = await validate(newEvent);
+
+      if (errors.length > 0) {
+        throw new Error(`Validation failed! Wrong field.`);
+      } else {
+        let agenda = Agenda.create<Agenda>({
+          cod_grupo_resp: newEvent.zone_id,
+          finalizado_em: newEvent.fim,
+          execucao_em: newEvent.inicio,
+          dataeventoinicial: newEvent.data_agendamento,
+          dataeventofinal: newEvent.data_agendamento,
+          DESCRICAO: newEvent.description,
+          cod_dispositivo: newEvent.mac,
+          cod_usu_solicitante: newEvent.request_by,
+          status: newEvent.status,
+          horaevento: newEvent.data_agendamento?.toTimeString()
+        })
+        await manager.save(agenda);
+        return await manager.save(newEvent);
+      }
+    })
+
+  } catch (err) {
+    throw err
   }
 }
 
@@ -126,24 +148,6 @@ export default {
           type: 2
         });
         const { id, local, piso, type, zone_id, request_by } = suport_event
-
-        if (original.type === 3) {
-          const item_agenda = Agenda.create([
-            {
-              cod_grupo_resp: suport_event.zone_id,
-              finalizado_em: suport_event.fim,
-              execucao_em: suport_event.inicio,
-              dataeventoinicial: suport_event.data_agendamento,
-              dataeventofinal: suport_event.data_agendamento,
-              DESCRICAO: suport_event.description,
-              cod_dispositivo: suport_event.mac,
-              cod_usu_solicitante: suport_event.request_by,
-              status: suport_event.status,
-              horaevento: suport_event.data_agendamento?.toTimeString()
-            }
-          ])
-          item_agenda[0].save()
-        }
 
         const requisitor = await User.findOne(request_by)
 
@@ -280,12 +284,19 @@ export default {
       const { VALOR, API } = req.query;
       console.log('query: ', req.query);
       try {
-        const response = await api_server.get(url, { params: req.query });
-        const { data } = response;
-        if (data.success) {
+        const response = await api_server.get<AspSucessResponse>(url, { params: req.query });
+        const { data: payload } = response;
+        if (payload.success) {
           if (Number(VALOR) === 1) {
-            const payload = data as AspResponse<true>;
-            const zone_id = encodeURI(payload.empresa).toLowerCase();
+            const target = await Device.findOne({
+              where: {
+                API
+              }
+            })
+
+            if (target?.valor === VALOR)
+              return res.status(400).send()
+
             const { id, local, piso, type } = await handleCreateEvent({
               banheiro: payload.local,
               box: payload.box,
@@ -295,15 +306,19 @@ export default {
               mac: String(API),
               zone_id: 1,
             } as any);
-            console.log('@event:new -', zone_id);
-            const time = new Date().toISOString();
 
-            io.path(zone_id).emit('@event:new', {
+            console.log('@event:new -', {
               id,
               local,
               piso,
               type,
-              time,
+            });
+
+            io.emit('@event:new', {
+              id,
+              local,
+              piso,
+              type,
             } as EventFeedItem);
           }
           res.status(200).send();
