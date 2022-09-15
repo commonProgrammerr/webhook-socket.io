@@ -288,15 +288,6 @@ export default {
         const { data: payload } = response;
         if (payload.success) {
           if (Number(VALOR) === 1) {
-            const target = await Device.findOne({
-              where: {
-                API
-              }
-            })
-
-            if (target?.valor === VALOR)
-              return res.status(400).send()
-
             const { id, local, piso, type } = await handleCreateEvent({
               banheiro: payload.local,
               box: payload.box,
