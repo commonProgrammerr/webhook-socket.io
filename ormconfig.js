@@ -6,10 +6,9 @@ const isProd =
 const basePath = isProd ? './build/src' : './src';
 const filesTypes = isProd ? '*.js' : '*.ts';
 
+// const url = 'mysql://mimodev:Arer3366547@10@192.168.15.86:3306/mimodev';
 const url =
   'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
-// : 'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
-// `postgres://postgres:postgres@localhost:5432/dev_maint_app`;
 
 console.log('connecting to', url);
 module.exports = {

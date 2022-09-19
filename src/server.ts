@@ -24,25 +24,18 @@ io.on('connection', async (socket) => {
   socket.on('disconnect', () => console.log(socket.id, ' leave...'));
   socket.on('loging', (user) => {
   })
-  socket.on('acept', async (data) => {
-    const { id, user } = data;
-    const event = await Event.findOne({ where: { id } });
-    if (event) {
-      event.inicio = new Date();
-      event.compleated_by = user
-      event.save();
-    }
-
-
-    // const resp = await api_server.post('/agenda/atualiza/', {
-    //   codigo: payload['codigo'],
-    //   status: 2,
-    // });
-  })
+  // socket.on('acept', async (data) => {
+  //   const { id, user } = data;
+  //   const event = await Event.findOne({ where: { id } });
+  //   if (event) {
+  //     event.inicio = new Date();
+  //     event.compleated_by = user
+  //     event.save();
+  //   }
+  // })
 });
 
-console.log(process.env.DATABASE_URL);
-async function hanleSendReports<T extends typeof io>(io: T) {
+async function hanleSendScheduledEvents<T extends typeof io>(io: T) {
 
   const offset_time = new Date();
   offset_time.setMinutes(offset_time.getMinutes() + 15);
@@ -71,15 +64,13 @@ async function hanleSendReports<T extends typeof io>(io: T) {
   });
 }
 
-app.post('/events/new', EventsController.push_event(io));
-app.post('/events/close', EventsController.close_event(io));
+app.post('/events/send_report', EventsController.close_event(io));
 app.post('/events/feed', EventsController.feed);
 app.post('/events/search', EventsController.search);
 app.post('/events/suport', EventsController.suport_event(io));
 
 app.get('/', EventsController.alert_notify(io));
 app.post('/acept', EventsController.acept(io));
-app.post('/notification', EventsController.push_notification(io));
 
 
 httpServer.listen(port, () =>
@@ -89,7 +80,7 @@ httpServer.listen(port, () =>
 let timeout: NodeJS.Timeout;
 function handleTimeout() {
   timeout = setTimeout(() => {
-    hanleSendReports(io)
+    hanleSendScheduledEvents(io)
       .then(() => handleTimeout())
       .catch((err) => {
         console.error(err);

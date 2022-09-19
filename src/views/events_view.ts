@@ -1,4 +1,3 @@
-import { IPush_Data } from '../controllers/event';
 import Event from '../models/Event';
 
 export type EventDTO = Omit<Partial<Event>, 'enable' | 'updated_at' | 'zone_id'>
