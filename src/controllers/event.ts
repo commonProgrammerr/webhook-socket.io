@@ -142,16 +142,16 @@ export default {
       try {
         const { id, report } = req.body;
         console.log(req.body);
-        const event = await Event.findOne(id);
+        const event = await Event.findOneOrFail(id);
         delete report.type_obs;
         await api_server.post('/report/', {
           ...report,
           id_agendamanutencao: event?.id_agendamanutencao,
         });
         if (event) {
-          console.log(event);
           event.fim = new Date();
-          // console.log('save:', await event.save());
+          console.log(event);
+          await event.save();
           io.emit('@event:close', {
             id: event.id,
           } as EventFeedItem);
@@ -231,15 +231,14 @@ export default {
     return async (req: Request, res: Response) => {
       const { id, user_id } = req.body;
       try {
-        const event = await Event.findOneOrFail(id);
-        // if (event?.type === 1) {
-        //   await api_server.get('registro/', {
-        //     params: {
-        //       VALOR: 3,
-        //       API: event.mac,
-        //     },
-        //   });
-        // }
+        const event = await Event.findOneOrFail(id as string);
+        if (event.type === 1) {
+          await api_server.post('agenda/atualiza/', {
+            status: 3,
+            codigo: event.id_agendamanutencao,
+            mac: event.mac
+          });
+        }
         event.enable = false;
         event.inicio = new Date();
         event.compleated_by = user_id;
