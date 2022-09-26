@@ -105,7 +105,7 @@ export default {
         const suport_event = await api_server.post('suporte/', {
           id: req.body.id,
           user_id: req.body.user_id,
-          description: req.body.description
+          description: req.body.description,
         });
 
         const { id, local, piso, type, request_by } = suport_event.data;
@@ -123,11 +123,12 @@ export default {
 
         return res.status(201).send();
       } catch (error) {
-        const err = error as AxiosError
+        const err = error as AxiosError;
         if (err.isAxiosError) {
-          return res.status(err.response?.status ?? 500).json(err.response?.data)
+          return res
+            .status(err.response?.status ?? 500)
+            .json(err.response?.data);
         } else {
-
           return res.status(500).json({
             code: 'Internal Error',
             msg: (error as Error).message,
@@ -141,15 +142,16 @@ export default {
       try {
         const { id, report } = req.body;
         console.log(req.body);
-        const event = await Event.findOne({ where: { id } });
+        const event = await Event.findOne(id);
         delete report.type_obs;
         await api_server.post('/report/', {
           ...report,
           id_agendamanutencao: event?.id_agendamanutencao,
         });
         if (event) {
+          console.log(event);
           event.fim = new Date();
-          await event.save();
+          // console.log('save:', await event.save());
           io.emit('@event:close', {
             id: event.id,
           } as EventFeedItem);
@@ -230,14 +232,14 @@ export default {
       const { id, user_id } = req.body;
       try {
         const event = await Event.findOneOrFail(id);
-        if (event?.type === 1) {
-          await api_server.get('registro/', {
-            params: {
-              VALOR: 3,
-              API: event.mac,
-            },
-          });
-        }
+        // if (event?.type === 1) {
+        //   await api_server.get('registro/', {
+        //     params: {
+        //       VALOR: 3,
+        //       API: event.mac,
+        //     },
+        //   });
+        // }
         event.enable = false;
         event.inicio = new Date();
         event.compleated_by = user_id;
