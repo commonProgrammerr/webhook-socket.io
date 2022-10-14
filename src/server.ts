@@ -6,7 +6,7 @@ import './database/connection';
 import Event, { EventType, Status } from './models/Event';
 import EventsController from './controllers/event';
 
-import { LessThanOrEqual, MoreThanOrEqual, Between } from 'typeorm';
+import { LessThanOrEqual, Not, MoreThanOrEqual, Raw } from 'typeorm';
 
 const app = express();
 const httpServer = createServer(app);
@@ -44,8 +44,8 @@ async function hanleSendScheduledEvents<T extends typeof io>(io: T) {
   const eventos = await Event.find({
     where: {
       enable: true,
-      status: Status.PROGRAMADO,
       inicio: null,
+      status: Raw((alias) => `${alias} <> :status`, { status: Status.ENVIADO }),
       type: EventType.PEVENTIVO,
       data_agendamento: LessThanOrEqual(offset_time.toISOString())
     },

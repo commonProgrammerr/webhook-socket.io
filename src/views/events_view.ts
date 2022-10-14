@@ -30,7 +30,8 @@ export default {
       type: event.type ?? undefined,
       description: event.description ?? undefined,
       mac: event.mac ?? undefined,
-      requestBy: event.requestBy ?? undefined
+      requestBy: event.requestBy ?? undefined,
+      data_agendamento: event.data_agendamento ?? undefined,
     };
   },
 

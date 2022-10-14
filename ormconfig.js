@@ -10,7 +10,6 @@ const filesTypes = isProd ? '*.js' : '*.ts';
 const url =
   'mysql://mimodev:Arer3366547@10@mimodev.mysql.dbaas.com.br:3306/mimodev';
 
-console.log('connecting to', url);
 module.exports = {
   type: 'mysql',
   migrations: [path.resolve(basePath, 'database/migrations', filesTypes)],
@@ -30,5 +29,5 @@ module.exports = {
   //   : undefined,
   synchronize: false,
   // logging: isProd,
-  logging: false,
+  logging: true,
 };
