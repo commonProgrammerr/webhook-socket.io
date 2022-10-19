@@ -1,9 +1,11 @@
 import { Server } from 'socket.io';
 import { Request, Response } from 'express';
-import Event from '../models/Event';
 import View, { EventFeedItem } from '../views/events_view';
 import axios, { AxiosError } from 'axios';
+
+import Event from '../models/Event';
 import User from '../models/User';
+import Grupo from '../models/Grupo';
 
 type AspSucessResponse = {
   id: string;
@@ -202,17 +204,28 @@ export default {
       const page_size = 5;
       const offset = ((page ?? 1) - 1) * page_size;
 
-      const result = await Event.find({
-        where: [
-          { enable: true },
-          { enable: false, compleated_by: user_id, fim: null },
-        ],
-        order: {
-          created_at: 'DESC',
-        },
-        skip: offset,
-        take: page_size,
-      });
+      const user = await User.findOneOrFail<User>(user_id);
+
+      // const result = await Event.find({
+      //   where: [
+      //     { enable: true, zone_id: user.cod_grupo_usuario },
+      //     { enable: false, compleated_by: user_id, fim: null },
+      //   ],
+      //   skip: offset,
+      //   take: page_size,
+      // });
+
+      const result = await Event.createQueryBuilder('events')
+        // .where(`enable = true AND zone_id = ${user.cod_grupo_usuario}`)
+        // .orWhere(`enable = false AND compleated_by = ${user_id} AND fim IS NULL`)
+        .where([
+          { enable: true, zone_id: user.cod_grupo_usuario },
+          { enable: false, compleated_by: user_id, fim: null }
+        ])
+        .orderBy('IF(data_agendamento IS NULL, 99999999999, data_agendamento)', 'DESC')
+        .skip(offset)
+        .take(page_size)
+        .getMany();
 
       return res.status(200).json({
         page,

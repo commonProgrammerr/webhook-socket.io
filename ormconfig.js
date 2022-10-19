@@ -29,5 +29,5 @@ module.exports = {
   //   : undefined,
   synchronize: false,
   // logging: isProd,
-  logging: true,
+  // logging: true,
 };

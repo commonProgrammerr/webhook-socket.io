@@ -8,6 +8,7 @@ import {
   BaseEntity,
   OneToOne,
   JoinColumn,
+  OrderByCondition,
 } from 'typeorm';
 import Agenda from './Agenda';
 import User from './User';

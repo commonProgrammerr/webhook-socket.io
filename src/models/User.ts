@@ -3,7 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   BaseEntity,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import Grupo from './Grupo';
 
 @Entity('USUARIO')
 export default class User extends BaseEntity {
@@ -23,6 +26,10 @@ export default class User extends BaseEntity {
 
   @Column('integer')
   cod_status: number;
+
+  @ManyToOne(type => Grupo, grupo => grupo.usuarios)
+  @JoinColumn({ name: 'cod_grupo_usuario' })
+  grupo: Grupo;
 
   @Column('integer')
   cod_grupo_usuario: number;
