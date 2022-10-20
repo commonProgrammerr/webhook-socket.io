@@ -50,36 +50,25 @@ async function hanleSendScheduledEvents<T extends typeof io>(io: T) {
       type: EventType.PEVENTIVO,
       data_agendamento: LessThanOrEqual(offset_time.toISOString())
     },
+    relations: ['grupo']
   });
-  const groups = {} as any
 
-  (await Grupo.find()).forEach(gp => {
-    groups[gp.id] = gp.nome
-  })
   eventos.forEach((ev) => {
-    const grupe = ev.zone_id && groups[ev.zone_id]
-    const message =
-    {
+    const grupe = ev.grupo?.nome
+
+    const message = {
       id: ev.id,
       local: ev.local,
       piso: ev.piso,
       type: ev.type,
       time: ev.data_agendamento,
     }
+    const server_namespace = grupe && `/${encodeURI(grupe)}`;
 
-    if (grupe) {
-      const server_namespace = `/${encodeURI(grupe)}`;
-      console.log('event: ', ev.id, 'send to ', server_namespace)
-      io.of(server_namespace).emit('@event:new', message);
-
-    } else {
-      console.log('event: ', ev.id, 'send to ', 'default')
-      io.emit('@event:new', message);
-
-    }
+    io.of(server_namespace || '/').emit('@event:new', message);
 
     ev.status = Status.ENVIADO;
-    Event.save(ev).then(() => console.log(ev.id, ' enviado'));
+    Event.save(ev).then(() => console.log('event:', ev.id, 'send to', server_namespace || '/'));
   });
 }
 

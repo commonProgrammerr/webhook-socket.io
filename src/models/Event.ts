@@ -11,6 +11,7 @@ import {
   OrderByCondition,
 } from 'typeorm';
 import Agenda from './Agenda';
+import Grupo from './Grupo';
 import User from './User';
 
 export enum EventType {
@@ -39,6 +40,10 @@ export default class Event extends BaseEntity {
 
   @Column('integer', { nullable: true })
   zone_id?: number;
+
+  @OneToOne((type) => Grupo, { nullable: true })
+  @JoinColumn({ name: 'zone_id' })
+  grupo?: Grupo;
 
   @Column('integer', { nullable: true })
   status?: Status;

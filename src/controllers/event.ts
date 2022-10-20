@@ -110,12 +110,23 @@ export default {
           description: req.body.description,
         });
 
-        const { id, local, piso, type, request_by } = suport_event.data;
+
+        const { id, request_by } = suport_event.data;
 
         const requisitor = await User.findOne(request_by);
+        const {
+          local,
+          grupo,
+          piso,
+          type
+        } = await Event.findOne(id, {
+          relations: ['grupo']
+        }) as Event;
 
         console.log('@event:suport', local);
-        io.emit('@event:new', {
+        const server_namespace = grupo?.nome && `/${encodeURI(grupo.nome)}`;
+
+        io.of(server_namespace || '/').emit('@event:new', {
           id,
           local,
           piso,
@@ -143,20 +154,23 @@ export default {
     return async (req: Request, res: Response) => {
       try {
         const { id, report } = req.body;
-        console.log(req.body);
-        const event = await Event.findOneOrFail(id);
+        const event = await Event.findOneOrFail(id, { relations: ['grupo'] }) as Event;
         delete report.type_obs;
+
         await api_server.post('/report/', {
           ...report,
-          id_agendamanutencao: event?.id_agendamanutencao,
+          id_agendamanutencao: event.id_agendamanutencao,
         });
+
         if (event) {
           event.fim = new Date();
-          console.log(event);
           await event.save();
-          io.emit('@event:close', {
+
+          const server_namespace = event.grupo?.nome && `/${encodeURI(event.grupo.nome)}`;
+          io.of(server_namespace || '/').emit('@event:close', {
             id: event.id,
           } as EventFeedItem);
+          console.log(event.id, server_namespace)
         }
         return res.status(200).send();
       } catch (error) {
@@ -206,18 +220,7 @@ export default {
 
       const user = await User.findOneOrFail<User>(user_id);
 
-      // const result = await Event.find({
-      //   where: [
-      //     { enable: true, zone_id: user.cod_grupo_usuario },
-      //     { enable: false, compleated_by: user_id, fim: null },
-      //   ],
-      //   skip: offset,
-      //   take: page_size,
-      // });
-
       const result = await Event.createQueryBuilder('events')
-        // .where(`enable = true AND zone_id = ${user.cod_grupo_usuario}`)
-        // .orWhere(`enable = false AND compleated_by = ${user_id} AND fim IS NULL`)
         .where([
           { enable: true, zone_id: user.cod_grupo_usuario },
           { enable: false, compleated_by: user_id, fim: null }
@@ -244,20 +247,22 @@ export default {
     return async (req: Request, res: Response) => {
       const { id, user_id } = req.body;
       try {
-        const event = await Event.findOneOrFail(id as string);
-        if (event.type === 1) {
-          await api_server.post('agenda/atualiza/', {
-            status: 3,
-            codigo: event.id_agendamanutencao,
-            mac: event.mac
-          });
-        }
+        const event = await Event.findOneOrFail(id as string, {
+          relations: ['grupo']
+        });
+
+        await api_server.post('agenda/atualiza/', {
+          status: 2,
+          codigo: event.id_agendamanutencao,
+          mac: event.mac
+        });
+
         event.enable = false;
         event.inicio = new Date();
         event.compleated_by = user_id;
         await event.save();
-
-        io.emit('@event:get', {
+        const server_namespace = event.grupo?.nome && `/${encodeURI(event.grupo.nome)}`
+        io.of(server_namespace || '/').emit('@event:get', {
           id,
           user_id,
         });
@@ -304,8 +309,12 @@ export default {
               piso,
               type: 1,
             });
+            const ev = await Event.findOneOrFail(id, {
+              relations: ['grupo']
+            })
 
-            io.emit('@event:new', {
+            const server_namespace = ev.grupo?.nome && `/${encodeURI(ev.grupo.nome)}`
+            io.of(server_namespace || '/').emit('@event:new', {
               id,
               local,
               piso,
